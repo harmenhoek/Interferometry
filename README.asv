@@ -14,7 +14,7 @@
 The main code requires several functions:
 - `Logging.m` Takes care of logging data clearly to the screen. Logging level can be set.
 - `GetIntersectsImageBorder.m` Calculates the intersection point of a line through a point in the image at a certain angle.
-- `HeightProfileForSlice.m` 
+- `HeightProfileForSlice
 
 ### Logging.m
 
@@ -31,4 +31,4 @@ The result `intersect` is [x, y] of the intersect with the image edge.
 
 Note: this function requires the standard `lineToBorderPoints` which is included in the XXX extension TODO
 
-### HeightProfileForSlice.m
+
