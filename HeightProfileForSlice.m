@@ -87,12 +87,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         x1 = locs(i+1);
         x2 = locs(i);
     
-        x = c(x1:x2);
+%         x = c(x1:x2);
         y = c_nor(x1:x2);
-        x_nor = x-x(1);
+%         x_nor = x-x(1);
         y_nor = (y-min(y))/(max(y)-min(y));
     
-        d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+        d = ModelFit(y_nor, lambda, HeightResolution);
         d_all{i} = d(2:end);
     end
 
@@ -123,13 +123,13 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         % fit from start to first extrema
         x = 1:locs(end);
         y = c_nor(x);  % intensity
-        x_nor = x-x(1); % is already the case? copied from above. Check!
+        %x_nor = x-x(1); % is already the case? copied from above. Check!
         y_nor = (y-min(y))/(max(y)-min(y));
         [y_start, y_end] = GetMedians(y, 10);
         
         if y(1) < y(end) % increasing dataset (to first max)
             if y_start < min_avg % start value is actual lower than avg. Assume it's a real min
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("START increasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of scaling
@@ -138,12 +138,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % (abs(min(y)-min_avg)).
                 b = abs(min(y)-min_avg);
                 y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b)+b;
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("START increasing, estimated minimum")
             end
         else % decrease
             if y_end > max_avg % end value is actual higher than avg. Assume it's a real max
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("START decreasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
@@ -152,7 +152,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % our max (abs(max(y)-max_avg)).
                 b = abs(max(y)-max_avg); % NOT TESTED ... No dataset ...
                 y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b);
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("START decreasing, estimated maximum")
             end
         end
@@ -162,13 +162,13 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         % fit last extrema to end
         x = 1:(length(c)-locs(1));
         y = c_nor(x);
-        x_nor = x-x(1); % is already the case? copied from above. Check!
+        %x_nor = x-x(1); % is already the case? copied from above. Check!
         y_nor = (y-min(y))/(max(y)-min(y));
         [~, y_end] = GetMedians(y, 10);
 
         if y(1) < y(end) % increasing dataset (to end)
             if y_end > max_avg % last value is actual larger than avg. Assume it's a real max
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("END start increasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
@@ -177,12 +177,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % our max (abs(max(y)-max_avg)).
                 b = abs(max(y)-max_avg); 
                 y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b);
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("END start increasing, estimated maximum")
             end
         else % decrease
             if y_end < min_avg % last value is actual lower than avg. Assume it's a real min
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("END start decreasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of
@@ -191,7 +191,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % our max (abs(min(y)-min_avg)).
                 b = abs(min(y)-min_avg);
                 y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b)+b;
-                d = ModelFit(x_nor, y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, lambda, HeightResolution);
 %                 disp("END start decreasing, estimated minimum")
             end 
         end
@@ -210,7 +210,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 
     
     
-    %% Post-processing
+    %% Stitching data together.
     
     sum_tot = 0;
     for i = 1:length(d_all)
