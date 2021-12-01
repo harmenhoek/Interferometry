@@ -47,7 +47,7 @@ Show slice images here!
 
 | `FilterBy_AmountExtrema = false`                             | `FilterBy_AmountExtrema = true`<br />`AmountExtrema_MaxDeviation = 0.05` |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="C:\Users\HOEKHJ\Documents\MATLAB\interferometry\Interferometry\screenshots\FilterBy_AmountExtrema_false.png" style="zoom: 33%;" /> | <img src="C:\Users\HOEKHJ\Documents\MATLAB\interferometry\Interferometry\screenshots\FilterBy_AmountExtrema_true.png" style="zoom: 33%;" /> |
+| <img src=screenshots\FilterBy_AmountExtrema_false.png" style="zoom: 33%;" /> | <img src="screenshots\FilterBy_AmountExtrema_true.png" style="zoom: 33%;" /> |
 
 
 
@@ -87,7 +87,7 @@ Input:
 
 Output:
 
-<img src="C:\Users\HOEKHJ\Documents\MATLAB\interferometry\Interferometry\screenshots\Logging_output.png" style="zoom:75%; align:left;" />
+<img src="screenshots\Logging_output.png" style="zoom:75%; align:left;" />
 
 Usage:
 
