@@ -1,19 +1,19 @@
-# `Interferometry`
- MATLAB program for analyzing interferometry images
+# Sɪɴɢʟᴇ Wᴀᴠᴇʟᴇɴɢᴛʜ Rᴇғʟᴇᴄᴛɪᴏɴ Iɴᴛᴇʀғᴇʀᴏᴍᴇᴛʀʏ Aɴᴀʟʏsɪs
+ MATLAB program for analyzing single wavelength interference microscopy images.
 
 ## About
-What this is.
-For single wavelength interferometry
+This MATLAB program converts inteferometry images obtained using single wavelength interference microscopy into a height profile.
+Program limitations:
 
+- Images need to be recorded at a single wavelength (can be a finite bandwidth, in that case give the average wavelength.)
+- Surface of the interference pattern needs to be monotomically increasing or decreasing, i.e. there can not be any local maxima.
+- The program can only determine a relative height profile, i.e. there needs to be a known height in the pattern to obtain exact heights. This is a limatition of single wavelength interferometry.
 
+## Table of Content
 
-Limitations:
-- Only monotonically increasing datasets
+[TOC]
 
-Work in progress:
-- 
-
-## How to use
+## Usage
 
 1. Open file `InterferometryMain.m`.
 2. Update the `filename` at the top of the code if necessary, and `img_cntr` (highest point in image) if available. The letter is not required.
@@ -22,9 +22,16 @@ Work in progress:
 
 ## Workings
 
-Show slice images here!
+The 2D interferometry image is split up in 1D radial intensity slices originating from an image center (image 1). Each slice is normalized and then analyzed seperately by detecing all the extrema in the intensity profile. Assuming the height difference between 2 maxima or 2 minima in the spectrum is the wavelength / 2, and this intensity varies with a cosine, we can fit each section of the spectra between 2 extrema with the model. The resulting height profiles between all extrema are stitched together to make a full height profile for each slice. Combining these height profiles for all slices and using interpolation results in a 3D height map of the surface (IMAGE X).
 
-## Settings
+| <img src="screenshots\1_raw.jpg" style="zoom:33%;" />1. Original image (compressed) | ![](screenshots\2_slices.png)2. Image enhancement <br />+ slice determination | ![](screenshots\3_slice.png)3. Individual slice analysis     |
+| :----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![](screenshots\4_sliceanalysis.png)4. Spectrum normalization<br />+ smoothing + peak detection | ![](screenshots\5_modelfitting.png)5. Extrema-extrema model fitting | ![](screenshots\6_sliceheight.png)6. Stitched height profile for one slice |
+| ![](screenshots\7a_contourmap.png)7a. Combined slices into a contour map | ![](screenshots\7b_3dsurface.png)7b. 3D surface map          | ![](screenshots\7c_averagedslice.png)7c. Averaged slice for a pi/8 sector |
+
+Note: The interferometry pattern shown above has local extrema that cannot be detected, resulting in incorrect slices.
+
+## Configuration
 
 **Basic settings**
 
@@ -47,7 +54,7 @@ Show slice images here!
 
 | `FilterBy_AmountExtrema = false`                             | `FilterBy_AmountExtrema = true`<br />`AmountExtrema_MaxDeviation = 0.05` |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src=screenshots\FilterBy_AmountExtrema_false.png" style="zoom: 33%;" /> | <img src="screenshots\FilterBy_AmountExtrema_true.png" style="zoom: 33%;" /> |
+| <img src="screenshots\FilterBy_AmountExtrema_false.png" style="zoom: 33%;" /> | <img src="screenshots\FilterBy_AmountExtrema_true.png" style="zoom: 33%;" /> |
 
 
 
@@ -181,4 +188,6 @@ Output:
 ### fillline.m
 
 ?
+
+## Work in Progess
 
