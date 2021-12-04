@@ -35,16 +35,16 @@ Note: The interferometry pattern shown above has local extrema that cannot be de
 
 **Basic settings**
 
-| Setting                  | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `filename`               | Path to single image path                                    |
-| `img_cntr`               | Center point of all the radial slices (highest point in the image). From here all the radial slices will originate. |
-| `Lambda`                 | Wavelength of the light used in the image in meters (if finite bandwidth, define center). |
-| `NumberSlices`           | Total number of radial slices (originating in `img_cntr`) in the full 2pi. |
-| `AnalyzeSector`          | If `true`,  only a sector (between `SectorStart` and `SectorEnd`) of the full 2pi will be analyzed. |
-| `EstimateOutsides`       | If `true`, before first extrema and after last extrema will be estimated, otherwise these datapoints will be filled in `NaN`. See `HeightProfileForSlice.m` function description below for explanation of this setting. |
-| `FilterBy_AmountExtrema` | If `true`, slices will be disregarded if the amount of extrema in a slice deviates more than AmountExtrema_MaxDeviation from the median amount of all slices. Example below. |
-| `LogLevel`               | Log level depth. If 1, only errors will be shown. See all levels at `Logging.m` function below. |
+| Setting                  | Type          | Description                                                  |
+| ------------------------ | ------------- | ------------------------------------------------------------ |
+| `filename`               | string        | Path to single image path                                    |
+| `img_cntr`               | array [x, y]  | Center point of all the radial slices (highest point in the image). From here all the radial slices will originate. Optional. If not set, GUI allows to select it in the image. |
+| `Lambda`                 | double        | Wavelength of the light used in the image in meters (if finite bandwidth, define center). |
+| `NumberSlices`           | double        | Total number of radial slices (originating in `img_cntr`) in the full 2pi. |
+| `AnalyzeSector`          | boolean       | If `true`,  only a sector (between `SectorStart` (double) and `SectorEnd` (double)) of the full 2pi will be analyzed. |
+| `EstimateOutsides`       | boolean       | If `true`, before first extrema and after last extrema will be estimated, otherwise these datapoints will be filled in `NaN`. See `HeightProfileForSlice.m` function description below for explanation of this setting. |
+| `FilterBy_AmountExtrema` | boolean       | If `true`, slices will be disregarded if the amount of extrema in a slice deviates more than AmountExtrema_MaxDeviation from the median amount of all slices. Note: the full 2pi is analyzed, and the origin is not centered, many slices will be discarded. Recommened use only when analyzing short sector. Example below. |
+| `LogLevel`               | integer [1-6] | Log level depth. If 1, only errors will be shown. See all levels at `Logging.m` function below. |
 
 ## Examples
 
@@ -70,7 +70,15 @@ Note: The interferometry pattern shown above has local extrema that cannot be de
 
 ### InterferometryMain.m
 
-This is the code to run 
+This is the code to run when using this program. The code uses all the functions below. Step-by-step what this code does:
+
+1. Settings are checked if valid.
+2. Image is read, converted to grayscale and the contrast is increased.
+3. If no image center (`img_cntr` variable) is set by user, the user is asked to pick the center  point of the interferometry pattern (highest point in image).
+4. Using the `img_cntr` as origin, the image slices are determined using the `GetIntersectsImageBorder` function.
+5. The code iterates over all slices (start-end coordinates). For each slice the function `HeightProfileForSlice` is ran to calculate the height profile of an interferometry spectrum. The corresponding x,y coordinates for each datapoint is determined using `fillline`. If no height profile can be determined (e.g. when no maxima is found, NaN is returned for that slice).
+6. If set by user settings, data is filtered. The current version only allows filtering by deviations in the number of extrema compared to the median number of extrema.
+7. Data is plotted. For the 3D surface plot and contour plot the x,y,z data of all the slices is interpolated to a rectangular grid and duplicates are averaged. For the slice average, the
 
 ### Logging.m
 
@@ -187,7 +195,7 @@ Output:
 
 ### fillline.m
 
-?
+Determines all the coordinates between 2 points.
 
 ## Work in Progess
 
