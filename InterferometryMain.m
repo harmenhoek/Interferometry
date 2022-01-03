@@ -65,6 +65,7 @@ Save_Figures = true;
     Save_FIG = true;
     Save_Folder = false;
 
+ShowLogoAtStart = true;
 
 global LogLevel
 LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
@@ -79,6 +80,13 @@ LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all us
 
 
 %% 0 - Settings checks and ititialization
+
+if ShowLogoAtStart
+    clc
+    ShowLogo
+end
+
+Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 
 % Set default plotting sizes
 set(0,'defaultAxesFontSize',15)

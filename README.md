@@ -1,19 +1,19 @@
-# `Interferometry`
- MATLAB program for analyzing interferometry images
+# Sɪɴɢʟᴇ Wᴀᴠᴇʟᴇɴɢᴛʜ Rᴇғʟᴇᴄᴛɪᴏɴ Iɴᴛᴇʀғᴇʀᴏᴍᴇᴛʀʏ Aɴᴀʟʏsɪs
+ MATLAB program for analyzing single wavelength interference microscopy images.
 
 ## About
-What this is.
-For single wavelength interferometry
+This MATLAB program converts inteferometry images obtained using single wavelength interference microscopy into a height profile.
+Program limitations:
 
+- Images need to be recorded at a single wavelength (can be a finite bandwidth, in that case give the average wavelength.)
+- Surface of the interference pattern needs to be monotomically increasing or decreasing, i.e. there can not be any local maxima.
+- The program can only determine a relative height profile, i.e. there needs to be a known height in the pattern to obtain exact heights. This is a limatition of single wavelength interferometry.
 
+## Table of Content
 
-Limitations:
-- Only monotonically increasing datasets
+[TOC]
 
-Work in progress:
-- 
-
-## How to use
+## Usage
 
 1. Open file `InterferometryMain.m`.
 2. Update the `filename` at the top of the code if necessary, and `img_cntr` (highest point in image) if available. The letter is not required.
@@ -22,22 +22,29 @@ Work in progress:
 
 ## Workings
 
-Show slice images here!
+The 2D interferometry image (image 1) is split up in 1D radial intensity slices originating from an image center (image 2). Each slice (image 3) is normalized and then analyzed seperately by detecing all the extrema in the intensity profile (image 4). Assuming the height difference between 2 maxima or 2 minima in the spectrum is the wavelength / 2, and this intensity varies with a cosine, we can fit each section of the spectra between 2 extrema with the model (image 5). The resulting height profiles between all extrema are stitched together to make a full height profile for each slice (image 6). Combining these height profiles for all slices and using interpolation results in a 3D height map of the surface (image 7a, 7b, 7c).
 
-## Settings
+| <div style="width:33%"><img src="screenshots\1_raw.jpg" style="zoom:15%;" />1. Original image (compressed) | <div style="width:33%"><img src="screenshots\2_slices.png" style="zoom:33%;" />2. Image enhancement <br />+ slice determination</div> | <div style="width:33%"><img src="screenshots\3_slice.png" style="zoom:33%;" />3. Individual slice analysis</div> |
+| :----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| <img src="screenshots\4_sliceanalysis.png" style="zoom:33%;" />4. Spectrum normalization<br />+ smoothing + peak detection</div> | <img src="screenshots\5_modelfitting.png" style="zoom:33%;" />5. Extrema-extrema model fitting | <img src="screenshots\6_sliceheight.png" style="zoom:33%;" />6. Stitched height profile for one slice |
+| <img src="screenshots\7a_contourmap.png" style="zoom:33%;" />7a. Combined slices into a contour map | <img src="screenshots\7b_3dsurface.png" style="zoom:33%;" />7b. 3D surface map | <img src="screenshots\7c_averagedslice.png" style="zoom:33%;" />7c. Averaged slice for a pi/8 sector |
+
+Note: The interferometry pattern shown above has local extrema that cannot be detected, resulting in incorrect slices.
+
+## Configuration
 
 **Basic settings**
 
-| Setting                  | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `filename`               | Path to single image path                                    |
-| `img_cntr`               | Center point of all the radial slices (highest point in the image). From here all the radial slices will originate. |
-| `Lambda`                 | Wavelength of the light used in the image in meters (if finite bandwidth, define center). |
-| `NumberSlices`           | Total number of radial slices (originating in `img_cntr`) in the full 2pi. |
-| `AnalyzeSector`          | If `true`,  only a sector (between `SectorStart` and `SectorEnd`) of the full 2pi will be analyzed. |
-| `EstimateOutsides`       | If `true`, before first extrema and after last extrema will be estimated, otherwise these datapoints will be filled in `NaN`. See `HeightProfileForSlice.m` function description below for explanation of this setting. |
-| `FilterBy_AmountExtrema` | If `true`, slices will be disregarded if the amount of extrema in a slice deviates more than AmountExtrema_MaxDeviation from the median amount of all slices. Example below. |
-| `LogLevel`               | Log level depth. If 1, only errors will be shown. See all levels at `Logging.m` function below. |
+| Setting                  | Type          | Description                                                  |
+| ------------------------ | ------------- | ------------------------------------------------------------ |
+| `filename`               | string        | Path to single image path                                    |
+| `img_cntr`               | array [x, y]  | Center point of all the radial slices (highest point in the image). From here all the radial slices will originate. Optional. If not set, GUI allows to select it in the image. |
+| `Lambda`                 | double        | Wavelength of the light used in the image in meters (if finite bandwidth, define center). |
+| `NumberSlices`           | double        | Total number of radial slices (originating in `img_cntr`) in the full 2pi. |
+| `AnalyzeSector`          | boolean       | If `true`,  only a sector (between `SectorStart` (double) and `SectorEnd` (double)) of the full 2pi will be analyzed. |
+| `EstimateOutsides`       | boolean       | If `true`, before first extrema and after last extrema will be estimated, otherwise these datapoints will be filled in `NaN`. See `HeightProfileForSlice.m` function description below for explanation of this setting. |
+| `FilterBy_AmountExtrema` | boolean       | If `true`, slices will be disregarded if the amount of extrema in a slice deviates more than AmountExtrema_MaxDeviation from the median amount of all slices. Note: the full 2pi is analyzed, and the origin is not centered, many slices will be discarded. Recommened use only when analyzing short sector. Example below. |
+| `LogLevel`               | integer [1-6] | Log level depth. If 1, only errors will be shown. See all levels at `Logging.m` function below. |
 
 ## Examples
 
@@ -63,7 +70,15 @@ Show slice images here!
 
 ### InterferometryMain.m
 
-This is the code to run 
+This is the code to run when using this program. The code uses all the functions below. Step-by-step what this code does:
+
+1. Settings are checked if valid.
+2. Image is read, converted to grayscale and the contrast is increased.
+3. If no image center (`img_cntr` variable) is set by user, the user is asked to pick the center  point of the interferometry pattern (highest point in image).
+4. Using the `img_cntr` as origin, the image slices are determined using the `GetIntersectsImageBorder` function.
+5. The code iterates over all slices (start-end coordinates). For each slice the function `HeightProfileForSlice` is ran to calculate the height profile of an interferometry spectrum. The corresponding x,y coordinates for each datapoint is determined using `fillline`. If no height profile can be determined (e.g. when no maxima is found, NaN is returned for that slice).
+6. If set by user settings, data is filtered. The current version only allows filtering by deviations in the number of extrema compared to the median number of extrema.
+7. Data is plotted. For the 3D surface plot and contour plot the x,y,z data of all the slices is interpolated to a rectangular grid and duplicates are averaged. For the slice average, the
 
 ### Logging.m
 
@@ -211,4 +226,5 @@ Output:
 - `status` is 0 when one or more checks fail, 1 when all pass.
 
 
+## Work in Progess
 
