@@ -63,8 +63,9 @@ Save_Figures = true;
     Save_PNG = true;
     Save_TIFF = true;
     Save_FIG = true;
-    Save_Folder = 'results2\';
+    Save_Folder = 'results';
 
+ShowLogoAtStart = true;
 
 global LogLevel
 LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
@@ -80,37 +81,12 @@ LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all us
 
 %% 0 - Settings checks and ititialization
 
-
-function [status] = CheckIfClass(class, variables)
-% supported classes: logical, char, numeric.
-% variables should be array of strings like: {'var1', 'var2'}.
-    for i = 1:length(variables)
-        variable = variables(i);
-        if strcmp(class, 'logical')
-            if ~islogical(variable)
-                status = 0;
-                Logging(3, append('Variable "', variable, '" should be logical, but is not (currently a ', num2str(class(eval(variable))) ,').'));
-                return
-            end
-        elseif strcmp(class, 'numeric')
-            if ~isnumeric(variable)
-                status = 0;
-                message = append('Variable "', variable, '" should be numeric, but is not (currently a ', num2str(class(eval(variable))) ,').'));
-                return
-            end
-        elseif strcmp(class, 'char')
-            if ~ischar(variable)
-                status = 0;
-                message = append('Variable "', variable, '" should be char, but is not (currently a ', num2str(class(eval(variable))) ,').'));
-                return
-            end
-        else
-            Logging(1, 'Class not supported. Choose "numeric", "logical" or "char"')
-        end
-    end
+if ShowLogoAtStart
+    clc
+    ShowLogo
 end
 
-
+Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 
 % Set default plotting sizes
 set(0,'defaultAxesFontSize',15)
@@ -121,18 +97,13 @@ if ~any(strcmp({'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}, ext))
     Logging(1, 'File format not supported.')
 end
 
-% Check if numbers
-if min(cellfun(@(x) isnumeric(x), {Lambda, PlotSingleSlice, NumberSlices, SectorStart, SectorEnd})) == 0
-    Logging(1, 'The settings "lambda, plot_line, slices, quadrant_start, quadrant_end, MaxDeviation" should be numerics.')
-end
-
-% Check booleans
-if min(cellfun(@(x) islogical(x), {AnalyzeSector, ShowHeightProfileProgress, FilterBy_AmountExtrema, Plot_Average, Save_Figures, Save_PNG, Save_TIFF, Save_FIG})) == 0
-    Logging(1, 'The settings "analyze_quadrant, ShowInvidualProgress, FilterBy_AmountExtrema, PlotAverage, Save_Figures, Save_PNG, Save_TIFF, Save_FIG" should be logicals.')
-end
-
-if min(cellfun(@(x) ischar(x), {Save_Folder})) == 0
-    Logging(1, 'The setting "Save_Folder" should be a string.')
+status = CheckIfClass('numeric', {'Lambda', 'PlotSingleSlice', 'NumberSlices', 'SectorStart', 'SectorEnd'});
+status2 = CheckIfClass('logical', {'AnalyzeSector', 'ShowHeightProfileProgress', 'FilterBy_AmountExtrema', 'Plot_Average', 'Save_Figures', 'Save_PNG', 'Save_TIFF', 'Save_FIG', 'ShowLogoAtStart'});
+status3 = CheckIfClass('char', {'Save_Folder'});
+if min([status, status2, status3]) == 0
+    Logging(1, 'Could not continue because of invalid settings (see WARNINGs above).')
+else
+    Logging(6, 'Settings are all of the right type.')
 end
 
 % Check amount of slices
@@ -167,16 +138,36 @@ end
 
 
 % Check Save_Folder
-if Save_Figures && ~exist(Save_Folder, 'dir')
-    [status, msg] = mkdir(Save_Folder);
-    if status == 0
-        Logging(1, append('Folder creation for image saving "', strrep(Save_Folder, '\', '\\'), '" failed! Error: ', msg))
-    else
-        Logging(5, append('Created folder for image saving "', strrep(Save_Folder, '\', '\\'), '" successfully.' ))
+if Save_Figures
+
+    if ~Save_PNG && ~Save_TIFF && ~Save_FIG
+        Logging(3, 'Save_PNG, Save_TIFF, Save_FIG are all set to false. No figures will be saved.')
     end
+
+    [path, name, ~] = fileparts(filename);
+    stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
+    basename = append(path, name, '_', stamp);
+
+    Save_Folder_Sub = append(Save_Folder, '\', stamp);
+    [status, msg] = mkdir(Save_Folder_Sub);
+    if status == 0
+        Logging(1, append('Folder creation for image saving "', strrep(Save_Folder_Sub, '\', '\\'), '" failed! Error: ', msg))
+    else
+        Logging(5, append('Created folder for image saving "', strrep(Save_Folder_Sub, '\', '\\'), '" successfully.' ))
+    end
+
+    
+
+        Save_PNG = true;
+    Save_TIFF = true;
+    Save_FIG = true;
+
+
+    save_extensions
+
 end
 
-clear ext steps maxres minres
+clear ext steps maxres minres status msg path name
 Logging(6, 'Settings checked and all valid.')
 
 %% 1 - Image loading
@@ -243,9 +234,14 @@ if show_slices
         clear pnt roi
     end
 
-end
+    
 
-clear f1 f2 k dtheta
+    status = SaveFigure(Save_Figures, f1, save_extensions, append(basename, '_SlicesOverview'));
+
+
+end % if show_slices
+
+clear f1 f2 k dtheta savename
 Logging(6, 'Slices determined successfully.')
 
 %% 3 - Get HeightProfile for all slices
@@ -319,9 +315,9 @@ for k = 1:length(points)  % iterate over all the end points (same length as all 
         xlim([0, max(c_l)])
         title('Height profile after model fit')
 
-        if Save_Figures
-            saveas()
-        end
+%         if Save_Figures
+%             saveas()
+%         end
 
     end % plotline
     
@@ -548,5 +544,16 @@ elapsedtime = toc;
 Logging(5, append('Code finished successfully in ', num2str(round(elapsedtime)), ' seconds.'))
 
 clear elapsedtime
+
+%% Functions
+
+function SaveFigure(saving_on, fig, extensions, name)
+    % Do some checks? isfig?
+    if saving_on
+        for i = 1:length(extensions)
+            saveas(fig, name, extensions(i))
+        end
+    end
+end
 
 

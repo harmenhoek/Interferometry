@@ -138,16 +138,29 @@ end
 
 
 % Check Save_Folder
-if Save_Figures && ~exist(Save_Folder, 'dir')
-    [status, msg] = mkdir(Save_Folder);
-    if status == 0
-        Logging(1, append('Folder creation for image saving "', strrep(Save_Folder, '\', '\\'), '" failed! Error: ', msg))
+if Save_Figures
+    if ~Save_PNG && ~Save_TIFF && ~Save_FIG
+        Save_Figures = false;
+        Logging(3, 'Save_PNG, Save_TIFF, Save_FIG are all set to false. No figures will be saved.')
     else
-        Logging(5, append('Created folder for image saving "', strrep(Save_Folder, '\', '\\'), '" successfully.' ))
+        [path, name, ~] = fileparts(filename);
+        stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
+        savefolder_sub = append(Save_Folder, '\', stamp);
+        [status, msg] = mkdir(savefolder_sub);
+        if status == 0
+            Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub, '\', '\\'), '" failed! Error: ', msg))
+        else
+            Logging(5, append('Created folder for image saving "', strrep(savefolder_sub, '\', '\\'), '" successfully.' ))
+        end
+
+        basename = append(savefolder_sub, '\', name, '_', stamp);
+    
+        extensions = {'png', 'tiff', 'fig'};
+        save_extensions = extensions([Save_PNG, Save_TIFF, Save_FIG]);
     end
 end
-
-clear ext steps maxres minres
+%%
+clear ext steps maxres minres status msg path name extensions savefolder_sub
 Logging(6, 'Settings checked and all valid.')
 
 %% 1 - Image loading
@@ -193,16 +206,13 @@ end
 
 show_slices = true;
 
-if show_slices
-    
+if show_slices   
     if exist('f1')
         figure(1)
         clf(f1)
     else
         f1 = figure(1);
     end
-    
-    
     imshow(I)
     hold on
     for k = 1:length(theta_all)
@@ -213,10 +223,10 @@ if show_slices
         text(pnt(:,1), pnt(:,2), num2str(k))
         clear pnt roi
     end
+    SaveFigure(Save_Figures, f1, save_extensions, append(basename, '_SlicesOverview'));
+end % if show_slices
 
-end
-
-clear f1 f2 k dtheta
+clear f1 f2 k dtheta savename
 Logging(6, 'Slices determined successfully.')
 
 %% 3 - Get HeightProfile for all slices
@@ -290,10 +300,8 @@ for k = 1:length(points)  % iterate over all the end points (same length as all 
         xlim([0, max(c_l)])
         title('Height profile after model fit')
 
-%         if Save_Figures
-%             saveas()
-%         end
 
+        SaveFigure(Save_Figures, f4, save_extensions, append(basename, '_Slice', num2str(k)));
     end % plotline
     
     clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns
@@ -430,7 +438,7 @@ if Plot_Contour
     
     
     
-    
+    SaveFigure(Save_Figures, f7, save_extensions, append(basename, '_Contour'));
     clear f7
 end
 
@@ -483,6 +491,8 @@ if Plot_Average
         ylabel('Height [um]')
     %     xlim([0, length(average_slice)])
     %     clear A
+
+    SaveFigure(Save_Figures, f6, save_extensions, append(basename, '_AverageSlice'));
     clear f6
 end
 
@@ -519,5 +529,18 @@ elapsedtime = toc;
 Logging(5, append('Code finished successfully in ', num2str(round(elapsedtime)), ' seconds.'))
 
 clear elapsedtime
+
+%% Functions
+
+function SaveFigure(saving_on, fig, extensions, name)
+    % Do some checks? isfig?
+    if saving_on
+        Logging(4, 'Figure saving in progress ...')
+        for i = 1:length(extensions)
+            saveas(fig, name, extensions(i))
+        end
+        Logging(6, 'Figure saved successfully.')
+    end
+end
 
 
