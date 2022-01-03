@@ -40,7 +40,7 @@ img_cntr = 1e3 * [1.3635, 2.9930];
 
 Lambda = 530e-9;                        % Wavelength of light in meters.
 
-NumberSlices = '300';                     % Total number of radial slices in the full 2pi
+NumberSlices = 300;                     % Total number of radial slices in the full 2pi
 AnalyzeSector = true;                   % If true, only a sector (between SectorStart and SectorEnd) of the full 2pi will be analyzed.
     SectorStart = pi + pi/2 - pi/16;    % Cloclwise from 3 o'clock. 
     SectorEnd = pi + pi/2 + pi/16;      % Note: beyond 3 o'clock not yet supported.
@@ -60,10 +60,10 @@ Plot_Average = true;                    % Calculate average multiple slices (con
 
 % Saving
 Save_Figures = true;
-    Save_PNG = 'true';
-    Save_TIFF = 6;
+    Save_PNG = true;
+    Save_TIFF = true;
     Save_FIG = true;
-    Save_Folder = false;
+    Save_Folder = 'results';
 
 ShowLogoAtStart = true;
 
@@ -98,7 +98,7 @@ if ~any(strcmp({'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}, ext))
 end
 
 status = CheckIfClass('numeric', {'Lambda', 'PlotSingleSlice', 'NumberSlices', 'SectorStart', 'SectorEnd'});
-status2 = CheckIfClass('logical', {'AnalyzeSector', 'ShowHeightProfileProgress', 'FilterBy_AmountExtrema', 'Plot_Average', 'Save_Figures', 'Save_PNG', 'Save_TIFF', 'Save_FIG'});
+status2 = CheckIfClass('logical', {'AnalyzeSector', 'ShowHeightProfileProgress', 'FilterBy_AmountExtrema', 'Plot_Average', 'Save_Figures', 'Save_PNG', 'Save_TIFF', 'Save_FIG', 'ShowLogoAtStart'});
 status3 = CheckIfClass('char', {'Save_Folder'});
 if min([status, status2, status3]) == 0
     Logging(1, 'Could not continue because of invalid settings (see WARNINGs above).')
@@ -290,9 +290,9 @@ for k = 1:length(points)  % iterate over all the end points (same length as all 
         xlim([0, max(c_l)])
         title('Height profile after model fit')
 
-        if Save_Figures
-            saveas()
-        end
+%         if Save_Figures
+%             saveas()
+%         end
 
     end % plotline
     

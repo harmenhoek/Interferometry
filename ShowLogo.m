@@ -9,7 +9,7 @@ function ShowLogo
     opts.ConsecutiveDelimitersRule = "join";
     opts = setvaropts(opts, "ad88888baI888I88888888ba88Ad888888", "WhitespaceRule", "preserve");
     opts = setvaropts(opts, "ad88888baI888I88888888ba88Ad888888", "EmptyFieldRule", "auto");
-    logo = readmatrix("C:\Users\HOEKHJ\Documents\MATLAB\interferometry\Interferometry\logo.txt", opts);
+    logo = readmatrix("logo.txt", opts);
     for i=1:size(logo,1)
         disp(logo(i,1))
     end
