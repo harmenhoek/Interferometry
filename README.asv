@@ -207,8 +207,8 @@ Input:
 
 Output:
 
-- Output to screen with variables that fail check.
-- `status` is 0 when one or more checks fail, 1 when all pass.
+- Outp
+- `y_start` is the  median of `max_samples` or less datapoints in at the start of array `y`.
 
 
 

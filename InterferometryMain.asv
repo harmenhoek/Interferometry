@@ -40,7 +40,7 @@ img_cntr = 1e3 * [1.3635, 2.9930];
 
 Lambda = 530e-9;                        % Wavelength of light in meters.
 
-NumberSlices = '300';                     % Total number of radial slices in the full 2pi
+NumberSlices = 300;                     % Total number of radial slices in the full 2pi
 AnalyzeSector = true;                   % If true, only a sector (between SectorStart and SectorEnd) of the full 2pi will be analyzed.
     SectorStart = pi + pi/2 - pi/16;    % Cloclwise from 3 o'clock. 
     SectorEnd = pi + pi/2 + pi/16;      % Note: beyond 3 o'clock not yet supported.
@@ -60,10 +60,10 @@ Plot_Average = true;                    % Calculate average multiple slices (con
 
 % Saving
 Save_Figures = true;
-    Save_PNG = 'true';
-    Save_TIFF = 6;
+    Save_PNG = true;
+    Save_TIFF = true;
     Save_FIG = true;
-    Save_Folder = false;
+    Save_Folder = 'results2\';
 
 
 global LogLevel
@@ -80,6 +80,38 @@ LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all us
 
 %% 0 - Settings checks and ititialization
 
+
+function [status] = CheckIfClass(class, variables)
+% supported classes: logical, char, numeric.
+% variables should be array of strings like: {'var1', 'var2'}.
+    for i = 1:length(variables)
+        variable = variables(i);
+        if strcmp(class, 'logical')
+            if ~islogical(variable)
+                status = 0;
+                Logging(3, append('Variable "', variable, '" should be logical, but is not (currently a ', num2str(class(eval(variable))) ,').'));
+                return
+            end
+        elseif strcmp(class, 'numeric')
+            if ~isnumeric(variable)
+                status = 0;
+                message = append('Variable "', variable, '" should be numeric, but is not (currently a ', num2str(class(eval(variable))) ,').'));
+                return
+            end
+        elseif strcmp(class, 'char')
+            if ~ischar(variable)
+                status = 0;
+                message = append('Variable "', variable, '" should be char, but is not (currently a ', num2str(class(eval(variable))) ,').'));
+                return
+            end
+        else
+            Logging(1, 'Class not supported. Choose "numeric", "logical" or "char"')
+        end
+    end
+end
+
+
+
 % Set default plotting sizes
 set(0,'defaultAxesFontSize',15)
 
@@ -89,13 +121,18 @@ if ~any(strcmp({'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}, ext))
     Logging(1, 'File format not supported.')
 end
 
-status = CheckIfClass('numeric', {'Lambda', 'PlotSingleSlice', 'NumberSlices', 'SectorStart', 'SectorEnd'});
-status2 = CheckIfClass('logical', {'AnalyzeSector', 'ShowHeightProfileProgress', 'FilterBy_AmountExtrema', 'Plot_Average', 'Save_Figures', 'Save_PNG', 'Save_TIFF', 'Save_FIG'});
-status3 = CheckIfClass('char', {'Save_Folder'});
-if min([status, status2, status3]) == 0
-    Logging(1, 'Could not continue because of invalid settings (see WARNINGs above).')
-else
-    Logging(6, 'Settings are all of the right type.')
+% Check if numbers
+if min(cellfun(@(x) isnumeric(x), {Lambda, PlotSingleSlice, NumberSlices, SectorStart, SectorEnd})) == 0
+    Logging(1, 'The settings "lambda, plot_line, slices, quadrant_start, quadrant_end, MaxDeviation" should be numerics.')
+end
+
+% Check booleans
+if min(cellfun(@(x) islogical(x), {AnalyzeSector, ShowHeightProfileProgress, FilterBy_AmountExtrema, Plot_Average, Save_Figures, Save_PNG, Save_TIFF, Save_FIG})) == 0
+    Logging(1, 'The settings "analyze_quadrant, ShowInvidualProgress, FilterBy_AmountExtrema, PlotAverage, Save_Figures, Save_PNG, Save_TIFF, Save_FIG" should be logicals.')
+end
+
+if min(cellfun(@(x) ischar(x), {Save_Folder})) == 0
+    Logging(1, 'The setting "Save_Folder" should be a string.')
 end
 
 % Check amount of slices

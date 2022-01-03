@@ -48,11 +48,18 @@ function Logging(type, message)
     end
 
     if LogLevel >= type
-        cprintf(LogTypes{type, 3}, pad(LogTypes{type, 2}, 10))
-        cprintf('white', append( ... % pad to length 10 (trailing spaces)
+        fprintf(pad(LogTypes{type, 2}, 10))
+        fprintf(append( ... % pad to length 10 (trailing spaces)
             regexprep(message, '%', '%%'), ...
             '\n' ...
             ))
+
+% 03-01-2022 fprintf is broken as of MATLAB 2021b. No fixavailable.
+%         cprintf(LogTypes{type, 3}, pad(LogTypes{type, 2}, 10))
+%         cprintf('white', append( ... % pad to length 10 (trailing spaces)
+%             regexprep(message, '%', '%%'), ...
+%             '\n' ...
+%             ))
         
         
         
