@@ -472,7 +472,7 @@ if Plot_Average
             B(i, :) = data(end-shortest_array+1:end);
         end
     end
-    mean_array = mean(B, 'omitnan');
+    mean_array = mean(B, 'omitnan'); %change to this line
 
 
     %     for i = 1:length(A)
@@ -489,8 +489,9 @@ if Plot_Average
         plot(mean_array, 'LineWidth', 3)
         xlabel('Distance from center[pix]')
         ylabel('Height [um]')
-    %     xlim([0, length(average_slice)])
+    %     xlim([0, length(average_slice)]) 
     %     clear A
+    % test changes here
 
     SaveFigure(Save_Figures, f6, save_extensions, append(basename, '_AverageSlice'));
     clear f6
