@@ -32,18 +32,23 @@ FIXES TODO
 % filename = 'data\fc2_save_2021-10-20-145841-0667.tif';
 % img_cntr = 1e3 * [1.9823, 0.8367];
 
-filename = 'data\100-3h-11102021102024-0.tiff';
-img_cntr = 1e3 * [1.3635, 2.9930];
+% filename = 'data\100-3h-11102021102024-0.tiff';
+% img_cntr = 1e3 * [1.3635, 2.9930];
 
+filename = 'data\20220124_evaptest_zeiss_greenfilter\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_54.tiff';
+img_cntr = 1e3 * [2.2415, 4.6085];
+Analyze_TwoParts_CutOff = 1473;
+
+% slice_cutoff
 
 %% SETTINGS
 
-Lambda = 530e-9;                        % Wavelength of light in meters.
+Lambda = 520e-9;                        % Wavelength of light in meters.
 
-NumberSlices = 300;                     % Total number of radial slices in the full 2pi
+NumberSlices = 400;                     % Total number of radial slices in the full 2pi
 AnalyzeSector = true;                   % If true, only a sector (between SectorStart and SectorEnd) of the full 2pi will be analyzed.
-    SectorStart = pi + pi/2 - pi/16;    % Cloclwise from 3 o'clock. 
-    SectorEnd = pi + pi/2 + pi/16;      % Note: beyond 3 o'clock not yet supported.
+    SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
+    SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
 
 EstimateOutsides = true;               % If true, before first extrema and after last extrema will be estimated (see documentation).
 
@@ -59,13 +64,24 @@ ShowHeightProfileProgress = true;       % Show progress of Height Profile calcul
 Plot_Average = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
 
 % Saving
-Save_Figures = true;
+Save_Figures = false;
     Save_PNG = true;
     Save_TIFF = true;
     Save_FIG = true;
     Save_Folder = 'results';
 
 ShowLogoAtStart = true;
+
+% Peak fitting settings
+% if Analyze_TwoParts is false, inside settings are used for all data
+Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+MinPeakDistance_inside = 15;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+MinPeakProminence_inside = 0.15;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Analyze_TwoParts_CutOff, or don't set (popup))
+    Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+
 
 global LogLevel
 LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
@@ -158,7 +174,23 @@ if Save_Figures
         extensions = {'png', 'tiff', 'fig'};
         save_extensions = extensions([Save_PNG, Save_TIFF, Save_FIG]);
     end
+else
+    save_extensions = NaN;
+    basename = '';
 end
+
+% Set peak fit settings structure
+PeakFitSettings = struct();
+PeakFitSettings.CutOff = Analyze_TwoParts;
+
+PeakFitSettings.a.MinPeakProminence = MinPeakProminence_inside;
+PeakFitSettings.b.MinPeakProminence = MinPeakProminence_outside;
+PeakFitSettings.a.MinPeakDistance = MinPeakDistance_inside;
+PeakFitSettings.b.MinPeakDistance = MinPeakDistance_outside;
+PeakFitSettings.a.Smoothing = Smoothing_inside;
+PeakFitSettings.b.Smoothing = Smoothing_outside;
+
+
 %%
 clear ext steps maxres minres status msg path name extensions savefolder_sub
 Logging(6, 'Settings checked and all valid.')
@@ -188,6 +220,7 @@ end
 clear filename pnt
 Logging(6, 'Image loaded successfully.')
 
+
 %% 2 - Determine slices
 
 Logging(5, '-- 2/6 -- Slice determining started.')
@@ -200,6 +233,31 @@ for k = 1:length(theta_all)
     points(k, :) = GetIntersectsImageBorder(img_cntr, theta, I_size);
     clear intersect_edge intersect_edge2 polangle idx theta
 end
+
+% Select TwoPart CutOff point
+if Analyze_TwoParts && ~exist('Analyze_TwoParts_CutOff')
+    %     Logging(2, 'No image center given in settings, pick image center now.')
+    if exist('f1')
+        figure(1)
+        clf(f1)
+    else
+        f1 = figure(1);
+    end
+    imshow(I)
+    hold on
+    for k = 1:length(theta_all)
+        pnt = points(k, :);
+        roi = [pnt; img_cntr];
+        plot(roi(:,1), roi(:,2), 'Color', 'red', 'LineWidth', 2)
+        plot(pnt(:,1), pnt(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
+        text(pnt(:,1), pnt(:,2), num2str(k))
+        clear pnt roi
+    end
+    pnt = drawpoint;
+    Analyze_TwoParts_CutOff = norm(pnt.Position-img_cntr);
+    close(f1)
+end
+PeakFitSettings.CutOffValue = Analyze_TwoParts_CutOff;
 
 
 % Show slices
@@ -222,6 +280,13 @@ if show_slices
         plot(pnt(:,1), pnt(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
         text(pnt(:,1), pnt(:,2), num2str(k))
         clear pnt roi
+    end
+    if Analyze_TwoParts
+        if AnalyzeSector
+            plot_arc(SectorStart, SectorEnd, img_cntr(1), img_cntr(2), Analyze_TwoParts_CutOff)
+        else 
+            plot_arc(0, 2*pi, img_cntr(1), img_cntr(2), Analyze_TwoParts_CutOff)
+        end
     end
     SaveFigure(Save_Figures, f1, save_extensions, append(basename, '_SlicesOverview'));
 end % if show_slices
@@ -247,7 +312,7 @@ for k = 1:length(points)  % iterate over all the end points (same length as all 
     pnt = floor(points(k, :));
     roi = [pnt; img_cntr];
 
-    [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Lambda, HeightResolution, EstimateOutsides);
+    [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Lambda, HeightResolution, EstimateOutsides, PeakFitSettings);
     if isnan(d_final)
         no_height_profile = no_height_profile + 1;
     end
@@ -544,4 +609,18 @@ function SaveFigure(saving_on, fig, extensions, name)
     end
 end
 
+function P = plot_arc(a,b,h,k,r)
+    % Plot a circular arc as a pie wedge.
+    % a is start of arc in radians, 
+    % b is end of arc in radians, 
+    % (h,k) is the center of the circle.
+    % r is the radius.
+    t = linspace(a,b);
+    x = r*cos(t) + h;
+    y = r*sin(t) + k;
+    P = plot(x,y,'b','LineWidth', 3);
+    if ~nargout
+        clear P
+    end
+end
 

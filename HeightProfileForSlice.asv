@@ -13,8 +13,6 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % 24-1-2022 => Implemented Settings struct. Settings are passed in 
     % function with Settings.a.MinPeakProminence, etc.
 
-    % Important note: function works from outside to inside!
-
     c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
 
 %     COMMENTED ON 23-11-2021
@@ -25,20 +23,19 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % check if splitting is possible if CutOff isset.
     if Settings.CutOff && Settings.CutOffValue > length(c)
         Logging(1, append('The CutOff value (', num2str(Settings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
-    else
-        Settings.CutOffValue = length(c) - Settings.CutOffValue;
     end
+        
     c_nor = (c-min(c))/(max(c)-min(c));
     
     if Settings.CutOff
-        c_nor_a = smoothdata(c_nor(1:Settings.CutOffValue), 'gaussian', Settings.b.Smoothing);
-        c_nor_b = smoothdata(c_nor(Settings.CutOffValue+1:end), 'gaussian', Settings.a.Smoothing);
-% size(c_nor(1:Settings.CutOffValue))
-% size(c_nor(Settings.CutOffValue+1:end))
-% size(c_nor)
-% size(c_nor_a)
-% size(c_nor_b)
-        c_nor = [c_nor_a; c_nor_b];
+        c_nor_a = smoothdata(c_nor(1:Settings.CutOffValue), 'gaussian', Settings.a.Smoothing);
+        c_nor_b = smoothdata(c_nor(Settings.CutOffValue+1:end), 'gaussian', Settings.b.Smoothing);
+%         size(c_nor(1:Settings.CutOffValue))
+%         size(c_nor(Settings.CutOffValue+1:end))
+%         size(c_nor)
+%         size(c_nor_a)
+%         size(c_nor_b)
+%         c_nor = [c_nor_a; c_nor_b];
     else
         c_nor = smoothdata(c_nor, 'gaussian', Settings.a.Smoothing);
     end
@@ -57,25 +54,25 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 
         if Settings.CutOff
             [pks_a, pks_locs_a] = findpeaks(c_nor(1:Settings.CutOffValue), ...
-            'MinPeakProminence', Settings.b.MinPeakProminence, ...
-            'MinPeakDistance', Settings.b.MinPeakDistance ...
+            'MinPeakProminence', Settings.a.MinPeakProminence, ...
+            'MinPeakDistance', Settings.a.MinPeakDistance ...
             );
             [mns_a, mns_locs_a] = findpeaks(-c_nor(1:Settings.CutOffValue), ...
+            'MinPeakProminence', Settings.a.MinPeakProminence, ...
+            'MinPeakDistance', Settings.a.MinPeakDistance ...
+            );
+            [pks_b, pks_locs_b] = findpeaks(c_nor(Settings.CutOffValue+1:end), ...
             'MinPeakProminence', Settings.b.MinPeakProminence, ...
             'MinPeakDistance', Settings.b.MinPeakDistance ...
             );
-            [pks_b, pks_locs_b] = findpeaks(c_nor(Settings.CutOffValue+1:end), ...
-            'MinPeakProminence', Settings.a.MinPeakProminence, ...
-            'MinPeakDistance', Settings.a.MinPeakDistance ...
-            );
             [mns_b, mns_locs_b] = findpeaks(-c_nor(Settings.CutOffValue+1:end), ...
-            'MinPeakProminence', Settings.a.MinPeakProminence, ...
-            'MinPeakDistance', Settings.a.MinPeakDistance ...
+            'MinPeakProminence', Settings.b.MinPeakProminence, ...
+            'MinPeakDistance', Settings.b.MinPeakDistance ...
             );
             pks = [pks_a; pks_b];
-            pks_locs = [pks_locs_a; pks_locs_b+Settings.CutOffValue];
+            pks_locs = [pks_locs_a; pks_locs_b];
             mns = [mns_a; mns_b];
-            mns_locs = [mns_locs_a; mns_locs_b+Settings.CutOffValue];
+            mns_locs = [mns_locs_a; mns_locs_b];
         else
             [pks, pks_locs] = findpeaks(c_nor, ...
                 'MinPeakProminence', Settings.a.MinPeakProminence, ...
@@ -88,19 +85,6 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 );
         end
     end
-
-
-% 
-%     figure
-%     plot(c_nor)
-%     hold on
-%     plot(pks_locs, pks, '.', 'MarkerSize', 15)
-%     plot(mns_locs, -mns, '.', 'MarkerSize', 15)
-%     return
-% length(pks)
-% length(mns)
-% mns = [mns; mns(end)];
-% mns_locs = [mns_locs; mns_locs(end)];
 
 %     pks'
 %     pks_locs'
@@ -278,6 +262,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 
     end
 
+    d_all(end)
     
     %% Stitching data together.
     
