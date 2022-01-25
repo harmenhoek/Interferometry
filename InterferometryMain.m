@@ -42,7 +42,7 @@ Settings.Analyze_TwoParts_CutOff = 1473;
 
 %% SETTINGS
 
-Settings.AnalyzeFolder = false;
+
 
 Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
 
@@ -117,11 +117,6 @@ Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 % Set default plotting sizes
 set(0,'defaultAxesFontSize',15)
 
-% Check if Settings.Source_Filename file is supported format
-[~, ~, ext] = fileparts(Settings.Source_Filename);
-if ~any(strcmp({'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}, ext))
-    Logging(1, 'File format not supported.')
-end
 
 status = CheckIfClass('numeric', {'Settings.Lambda', 'Settings.PlotSingleSlice', 'Settings.NumberSlices', 'Settings.SectorStart', 'Settings.SectorEnd'});
 status2 = CheckIfClass('logical', {'Settings.AnalyzeSector', 'Settings.ShowHeightProfileProgress', 'Settings.FilterBy_AmountExtrema', 'Settings.Plot_AverageHeight', 'Settings.Save_Figures', 'Settings.Save_PNG', 'Settings.Save_TIFF', 'Settings.Save_FIG', 'Settings.ShowLogoAtStart'});
@@ -207,36 +202,59 @@ Settings.PeakFitSettings.a.Smoothing = Settings.Smoothing_inside;
 Settings.PeakFitSettings.b.Smoothing = Settings.Smoothing_outside;
 
 % Check wether images > N, then Show_Plots = False
+% TODO
 
 
-%%
+Settings.Source = 'data\';
+Settings.AnalyzeRange = false;
+
+if isfolder(Settings.Source)
+    Settings.AnalyzeFolder = true;
+    Logging(5, 'Source is a folder, multiple images will be analyzed.')
+elseif isfile(Settings.Source)
+    Settings.AnalyzeFolder = false;
+    Logging(5, 'Source is a file, this single image will be analyzed.')
+else
+    Logging(1, append('Entered Source "', string(Settings.Source), '" is not a folder nor file.'))
+end
+
+
+% List all images in selected folder.
+if Settings.AnalyzeFolder
+    if ~strcmp(Settings.Source_FolderPath(end), '\')
+        Settings.Source_FolderPath = append(Settings.Source_FolderPath, '\');
+    end
+    Settings.Source_ImageList = {};
+    for ext = {'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}
+        images = dir(append(Settings.Source_FolderPath, '*', ext{1}));
+        Settings.Source_ImageList = [all_images, {images.name}];
+    end
+    if isempty(Settings.Source_ImageList)
+        Logging(1, 'No images found in Source folder.')
+    else
+        Logging(5, append(num2str(length(Settings.Source_ImageList)), ' images found in Source folder.'))
+    end
+    Settings.Source_Filename = append(Settings.Source_FolderPath, Settings.Source_ImageList{1}); % image selecting img_cntr etc.
+     
+    if isfield(Settings, 'AnalyzeRange')  %check wether user wants to analyze a range of images
+        if isempty(Settings.AnalyzeRange) || ~Settings.AnalyzeRange
+           Settings.Analyze_Range_Values = 1:length(Settings.Source_ImageList);
+        end
+    else 
+        Settings.Analyze_Range_Values = 1:length(Settings.Source_ImageList);
+        Logging(5, 'The entered selected Range of images (alphabetically in folder) will be analyzed.')
+    end
+else %input is single file
+    % Check if Settings.Source_Filename file is supported format
+    [~, ~, ext] = fileparts(Settings.Source);
+    if ~any(strcmp({'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'}, ext))
+        Logging(1, 'File format not a supported image.')
+    end
+     Settings.Source_Filename = Settings.Source;
+end
+
 clear ext steps maxres minres status msg path name extensions savefolder_sub
 Logging(6, 'Settings checked and all valid.')
-
-
-%% Start multi-image analysis here.
-HeightProfiles_ForSlices_AllImages = struct();
-
-% 
-% if Analyze_Folder
-%    if ~Analyze_Range
-%       Analyze_Range_Values = TOTAL IMAGES; 
-%    end
-%    
-%    for i = Analyze_Range_Values
-%       RUN FUNCTION 
-%    end
-%     
-%     
-% else
-%     
-%     
-% end
-% 
-% 
-% function SOMETHING(Settings, image)
-% 
-% end
 
 
 %% 1 - Image loading
@@ -252,7 +270,7 @@ I = adapthisteq(I);
 I_size(1) = size(I, 1);
 I_size(2) = size(I, 2);
 
-if isfield(Settings, 'Settings.Interferometry_Center')
+if isfield(Settings, 'Interferometry_Center')
     Logging(2, 'No image center given in settings, pick image center now.')
     f_temp = figure;
     imshow(I)
@@ -280,6 +298,7 @@ end
 
 % Select TwoPart CutOff point
 if Settings.Analyze_TwoParts && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
+    Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
     Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I,  'theta_all',theta_all, 'points',points));
 end
 Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
@@ -294,6 +313,8 @@ Logging(6, 'Slices determined successfully.')
 %% 3 - Get HeightProfile for all slices
 
 Logging(5, '-- 3/6 -- Height Profile calculations started.')
+
+% CONTINUE HERE: Settings.AnalyzeFolder
 
 data_cell = cell(length(theta_all) ,1);
 number_extrema = nan(length(theta_all), 2);
