@@ -1,4 +1,9 @@
 function height = ModelFit(intensity, wavelength, HeightResolution)
+    % This is the main model for converting intensity pattern to height.
+    % This most simple approach uses the fact that between 2 interferometry
+    % peaks, the distance traveled by the light is lambda/2. The shape of
+    % the interference pattern is ~cos(kx-wt).
+    
    
     LUT_datapoints = (wavelength/4) / HeightResolution;
     height = nan(1, length(intensity));

@@ -37,6 +37,7 @@ FIXES TODO
 
 Settings.Source_Filename = 'data\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_36.tiff';
 Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
+Settings.RefractiveIndex_Medium = 1.4329;
 Settings.Analyze_TwoParts_CutOff = 1473;
 
 %% SETTINGS
@@ -141,11 +142,13 @@ if length(theta_all) < Settings.PlotSingleSlice
     Logging(3, 'Settings.PlotSingleSlice is bigger than the amount of slices. No single slice data will be shown.')
 end
 
+% Correct wavelength for breaking index
+Settings.Lambda_Corrected = Settings.Lambda / Settings.RefractiveIndex_Medium;
 
 % Check valid Settings.HeightResolution
-steps = (Settings.Lambda/4) / Settings.HeightResolution;
-maxres =  num2str(ceil((Settings.Lambda/4) / 5 *1e9));
-minres =  num2str(ceil((Settings.Lambda/4) / 500*1e9));
+steps = (Settings.Lambda_Corrected/4) / Settings.HeightResolution;
+maxres =  num2str(ceil((Settings.Lambda_Corrected/4) / 5 *1e9));
+minres =  num2str(ceil((Settings.Lambda_Corrected/4) / 500*1e9));
 if steps < 5
     Logging(1, strcat("Settings.HeightResolution too big, choose a value between ", minres, " and ", maxres, " nm."))
 elseif steps > 500
@@ -193,9 +196,36 @@ Settings.PeakFitSettings.b.MinPeakDistance = Settings.MinPeakDistance_outside;
 Settings.PeakFitSettings.a.Smoothing = Settings.Smoothing_inside;
 Settings.PeakFitSettings.b.Smoothing = Settings.Smoothing_outside;
 
+
 %%
 clear ext steps maxres minres status msg path name extensions savefolder_sub
 Logging(6, 'Settings checked and all valid.')
+
+
+%% Start multi-image analysis here.
+HeightProfiles_ForSlices_AllImages = struct();
+
+% 
+% if Analyze_Folder
+%    if ~Analyze_Range
+%       Analyze_Range_Values = TOTAL IMAGES; 
+%    end
+%    
+%    for i = Analyze_Range_Values
+%       RUN FUNCTION 
+%    end
+%     
+%     
+% else
+%     
+%     
+% end
+% 
+% 
+% function SOMETHING(Settings, image)
+% 
+% end
+
 
 %% 1 - Image loading
 
@@ -314,7 +344,7 @@ for k = 1:length(points)  % iterate over all the end points (same length as all 
     pnt = floor(points(k, :));
     roi = [pnt; Settings.Interferometry_Center];
 
-    [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+    [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
     if isnan(d_final)
         no_height_profile = no_height_profile + 1;
     end
