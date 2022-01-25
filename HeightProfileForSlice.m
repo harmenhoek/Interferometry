@@ -13,14 +13,11 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % 24-1-2022 => Implemented Settings struct. Settings are passed in 
     % function with Settings.a.MinPeakProminence, etc.
 
-    % Important note: function works from outside to inside!
+    % Important note: function works from outside to inside! That's why a
+    % and b are so confusingly used here. Better would be to rewrite
+    % function to work from inside to outside ...
 
     c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
-
-%     COMMENTED ON 23-11-2021
-%     if c(1) > c(end)
-%         c = flip(c);
-%     end
     
     % check if splitting is possible if CutOff isset.
     if Settings.CutOff && Settings.CutOffValue > length(c)
@@ -33,16 +30,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     if Settings.CutOff
         c_nor_a = smoothdata(c_nor(1:Settings.CutOffValue), 'gaussian', Settings.b.Smoothing);
         c_nor_b = smoothdata(c_nor(Settings.CutOffValue+1:end), 'gaussian', Settings.a.Smoothing);
-% size(c_nor(1:Settings.CutOffValue))
-% size(c_nor(Settings.CutOffValue+1:end))
-% size(c_nor)
-% size(c_nor_a)
-% size(c_nor_b)
         c_nor = [c_nor_a; c_nor_b];
     else
         c_nor = smoothdata(c_nor, 'gaussian', Settings.a.Smoothing);
     end
 
+    
     
     % catch really short slices
     if length(c_nor) < 50  % TODO find a nicer way to catch these things
@@ -56,22 +49,40 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         % peak)
 
         if Settings.CutOff
-            [pks_a, pks_locs_a] = findpeaks(c_nor(1:Settings.CutOffValue), ...
-            'MinPeakProminence', Settings.b.MinPeakProminence, ...
-            'MinPeakDistance', Settings.b.MinPeakDistance ...
-            );
-            [mns_a, mns_locs_a] = findpeaks(-c_nor(1:Settings.CutOffValue), ...
-            'MinPeakProminence', Settings.b.MinPeakProminence, ...
-            'MinPeakDistance', Settings.b.MinPeakDistance ...
-            );
-            [pks_b, pks_locs_b] = findpeaks(c_nor(Settings.CutOffValue+1:end), ...
+            
+            %inside
+            [pks_b, pks_locs_b] = findpeaks(c_nor_b, ...
             'MinPeakProminence', Settings.a.MinPeakProminence, ...
             'MinPeakDistance', Settings.a.MinPeakDistance ...
             );
-            [mns_b, mns_locs_b] = findpeaks(-c_nor(Settings.CutOffValue+1:end), ...
+            [mns_b, mns_locs_b] = findpeaks(-c_nor_b, ...
             'MinPeakProminence', Settings.a.MinPeakProminence, ...
             'MinPeakDistance', Settings.a.MinPeakDistance ...
             );
+        
+            % The first maxima or minima of part b (outside) is not taken
+            % into account if it's too close to the start
+            % (MinPeakProminance excludes it then). To fix this, we include
+            % extra data in part b: up to the first extrema in part a. We
+            % then have to resmooth the data. Still not perfect, but it
+            % finds the first extrema.
+            if Settings.CutOffIncludeMargin && ~isempty(pks_locs_b) && ~isempty(mns_locs_b)
+                first_peak = min([pks_locs_b(1); mns_locs_b(1)]) + length(c_nor_a);
+                c_nor_a = smoothdata(c_nor(1:first_peak), 'gaussian', Settings.b.Smoothing);
+                c_nor_b =  smoothdata(c_nor(first_peak+1:end), 'gaussian', Settings.a.Smoothing);
+                c_nor = [c_nor_a; c_nor_b];
+            end
+            
+            %outside
+            [pks_a, pks_locs_a] = findpeaks(c_nor_a, ...
+            'MinPeakProminence', Settings.b.MinPeakProminence, ...
+            'MinPeakDistance', Settings.b.MinPeakDistance ...
+            );
+            [mns_a, mns_locs_a] = findpeaks(-c_nor_a, ...
+            'MinPeakProminence', Settings.b.MinPeakProminence, ...
+            'MinPeakDistance', Settings.b.MinPeakDistance ...
+            );
+        
             pks = [pks_a; pks_b];
             pks_locs = [pks_locs_a; pks_locs_b+Settings.CutOffValue];
             mns = [mns_a; mns_b];
@@ -88,26 +99,6 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 );
         end
     end
-
-
-% 
-%     figure
-%     plot(c_nor)
-%     hold on
-%     plot(pks_locs, pks, '.', 'MarkerSize', 15)
-%     plot(mns_locs, -mns, '.', 'MarkerSize', 15)
-%     return
-% length(pks)
-% length(mns)
-% mns = [mns; mns(end)];
-% mns_locs = [mns_locs; mns_locs(end)];
-
-%     pks'
-%     pks_locs'
-%     mns'
-%     mns_locs'
-%  d_final = nan;
-%     return
 
 %% CHECKS
 
