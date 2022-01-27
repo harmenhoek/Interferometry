@@ -20,6 +20,9 @@ FIXES TODO
 - Alignment of contour on image, espcially when sector is selected.
 - Show image sector above average slice (covert to radial coordinates).
 
+- ESTIMATE remaining time left, based on average iteration time of each
+loop + extra at the end.
+
 %} 
 
 
@@ -36,7 +39,7 @@ FIXES TODO
 % Settings.Interferometry_Center = 1e3 * [1.3635, 2.9930];
 
 % Settings.Source = 'data\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_36.tiff';
-Settings.Source = 'data\jan2022';
+Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
 Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
 Settings.RefractiveIndex_Medium = 1.4329;
 Settings.Analyze_TwoParts_CutOff = 1473;
@@ -44,6 +47,8 @@ Settings.Analyze_TwoParts_CutOff = 1473;
 %% SETTINGS
 
 Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
+
+Settings.ImageSkip = 2;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
 Settings.NumberSlices = 400;                     % Total number of radial slices in the full 2pi
 Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
@@ -77,12 +82,13 @@ Settings.Plot_Contour = true;
     Settings.Plot_Contour_Levels = 10;
     Settings.Plot_Contour_Transparency = 0.6;
 Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
+Settings.Plot_AverageHeightAllImages = true;
 
 % Saving
-Settings.Save_Figures = false;
+Settings.Save_Figures = true;
     Settings.Save_PNG = true;
-    Settings.Save_TIFF = true;
-    Settings.Save_FIG = true;
+    Settings.Save_TIFF = false;
+    Settings.Save_FIG = false;
     Settings.Save_Folder = 'results';
 Settings.Save_Data = true;
 
@@ -98,7 +104,7 @@ Settings.Analyze_TwoParts = true;                % Use different settings for in
     Settings.Analyze_TwoPart_IncludeMargin = true; % include inside data (up to first extrema) into outside, to enhance peak finding.
 
 global LogLevel
-LogLevel = 6;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
+LogLevel = 5;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
 %{
     1, 'ERROR';     % Code cannot continue.
     2, 'ACTION';    % User needs to do something.
@@ -177,9 +183,6 @@ Settings.PeakFitSettings.b.MinPeakDistance = Settings.MinPeakDistance_outside;
 Settings.PeakFitSettings.a.Smoothing = Settings.Smoothing_inside;
 Settings.PeakFitSettings.b.Smoothing = Settings.Smoothing_outside;
 
-% Check wether images > N, then Show_Plots = False
-% TODO
-
 
 % Settings.Source = 'data\';
 Settings.AnalyzeRange = false;
@@ -206,10 +209,12 @@ if Settings.AnalyzeFolder
         images_fullpath = cellfun(@(x) append(x.folder, '\', x.name), num2cell(images), 'UniformOutput', false);
         Settings.Source_ImageList = [Settings.Source_ImageList, images_fullpath];
     end
+    Settings.Source_ImageList = natsortfiles(Settings.Source_ImageList); % Stephen (2022). Natural-Order Filename Sort (https://www.mathworks.com/matlabcentral/fileexchange/47434-natural-order-filename-sort), MATLAB Central File Exchange. Retrieved January 27, 2022. 
+
     if isempty(Settings.Source_ImageList)
         Logging(1, 'No images found in Source folder.')
     else
-        Logging(5, append(num2str(length(Settings.Source_ImageList)), ' images found in Source folder.'))
+        Logging(5, append(num2str(length(Settings.Source_ImageList)), ' images found in Source folder, ', num2str(length(1:Settings.ImageSkip:length(Settings.Source_ImageList))), ' will be analyzed (every ', num2str(Settings.ImageSkip), ' image(s)).'))
     end
      
     if isfield(Settings, 'AnalyzeRange')  %check wether user wants to analyze a range of images
@@ -228,6 +233,7 @@ else %input is single file
     end
      Settings.Source_ImageList = {Settings.Source};
 end
+Settings.ImageCount = length(Settings.Source_ImageList);
 
 % Set save folder and naming for figures and data
 save_extensions = NaN;
@@ -296,10 +302,10 @@ I_size(2) = size(I, 2);
 
 if isfield(Settings, 'Settings.Interferometry_Center')
     Logging(2, 'No image center given in settings, pick image center now.')
+    Settings.Interferometry_Center = pnt.Position;
     f_temp = figure;
     imshow(I)
     pnt = drawpoint;
-    Settings.Interferometry_Center = pnt.Position;
     close(f_temp)
 end
 
@@ -342,11 +348,15 @@ Logging(5, '-- 3/6 -- Height Profile calculations started.')
 HeightProfiles_ForSlices_AllImages = cell(1, length(Settings.Source_ImageList));
 HeightProfile_Mean_AllImages = cell(1, length(Settings.Source_ImageList));
 
-for i = 1:length(Settings.Source_ImageList)
+for i = 1:Settings.ImageSkip:Settings.ImageCount
     Image = Settings.Source_ImageList{i};
     
-    if mod(i, round(length(length(Settings.Source_ImageList))/Settings.Display.ImageProgressValue)) == 0 && Settings.Display.ImageProgress
-        Logging(5, append("Profile calculation of all images at ", num2str(i/round(length(Settings.Source_ImageList))*100), '%.'))
+    if mod(num2str((i-1)/Settings.ImageSkip), round(length(1:Settings.ImageSkip:Settings.ImageCount)/10)) == 0 % MAKE THIS 10% smart! If a lot of images, show more often.
+        Logging(5, append("~~~~~~ Height profile calculations for all images at ", num2str(round(i/Settings.ImageCount*10)*10), "% ~~~~~~"))
+    end
+
+    if mod(i, Settings.Display.ImageProgressValue) == 0 && Settings.Display.ImageProgress
+        Logging(6, append("Image ", num2str((i-1)/Settings.ImageSkip+1), "/", num2str(length(1:Settings.ImageSkip:Settings.ImageCount)), ' being processed.'))
     end
     
     I_or = imread(Image);
@@ -363,7 +373,7 @@ for i = 1:length(Settings.Source_ImageList)
     first_empty_row = 1;
     for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
         if mod(k, round(length(theta_all)/Settings.Display.HeightProfileProgressValue)) == 0 && Settings.Display.HeightProfileProgress
-            Logging(5, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/round(length(theta_all)/10)*10), '%.'))
+            Logging(6, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/(length(theta_all)/10)*10), '%.'))
         end
         pnt = floor(points(k, :));
         roi = [pnt; Settings.Interferometry_Center];
@@ -401,11 +411,11 @@ for i = 1:length(Settings.Source_ImageList)
     end
 
     clear k first_empty_row f4 no_height_profile
-    Logging(6, 'Height profiles determined successfully for all slices.')
+    Logging(6, append('Height profiles determined successfully for all slices for image ', num2str(i), '.'))
 
     %% 4 - Filtering of HeightProfile data and Postprocessing of data
 
-    Logging(5, '-- 4/6 -- Filtering of HeightProfile data and Postprocessing of data started.')
+    Logging(6, append('Filtering of HeightProfile data and Postprocessing of data started for image ', num2str(i), '.'))
 
     % filter based on length of peaks
     if Settings.FilterBy_AmountExtrema
@@ -443,11 +453,11 @@ for i = 1:length(Settings.Source_ImageList)
     
 
     
-    Logging(6, 'Filtering and postprocessing completed successfully.')
+    Logging(6, append('Filtering and postprocessing completed successfully for image ', num2str(i), '.'))
 
     %% 5 - Plotting of results
 
-    Logging(5, '-- 5/6 -- Plotting of results started.')
+    Logging(6, append('Plotting of results started for image ', num2str(i), '.'))
 
     f5 = Plot.Surface(Settings, struct('data_all',data_all));
     SaveFigure(min([Settings.Save_Figures Settings.Plot_Surface]), f5, save_extensions, append(basename, '_Surface_', num2str(i)));
@@ -458,7 +468,7 @@ for i = 1:length(Settings.Source_ImageList)
     f6 = Plot.AverageHeight(Settings, struct('HeightProfile_Mean',HeightProfile_Mean)); %TODO, take mean_array out of here!
     SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeight]), f6, save_extensions, append(basename, '_AverageSlice', num2str(i)));
 
-    Logging(6, 'Plotting finished successfully.')
+    Logging(6, append('Plotting finished successfully for image ', num2str(i), '.'))
     
     %% Return from loop
     HeightProfiles_ForSlices_AllImages{i} = HeightProfiles_ForSlices;
@@ -470,11 +480,10 @@ end % iterate over all images
 clear i
 
 %% X - Plot total data
-clc
-Settings.Plot_AverageHeightAllImages = true;
+
 
 f8 = Plot.AverageHeight_AllImages(Settings, struct('HeightProfile_Mean_AllImages', {HeightProfile_Mean_AllImages}));
-SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeightAllImages]), f5, save_extensions, append(basename, '_AverageSlice_total'));
+SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeightAllImages]), f8, save_extensions, append(basename, '_AverageSlice_total'));
 
 %% 6 - Save data
 
@@ -505,7 +514,7 @@ clear elapsedtime
 function SaveFigure(saving_on, fig, extensions, name)
     % Do some checks? isfig?
     if saving_on
-        Logging(4, 'Figure saving in progress ...')
+        Logging(6, 'Figure saving in progress ...')
         for i = 1:length(extensions)
             saveas(fig, name, extensions(i))
         end
