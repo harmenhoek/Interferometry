@@ -2,7 +2,7 @@ classdef Plot
     methods (Static)
         
         function Analyze_TwoParts_CutOff = VisualizeSlicesCutOff(Settings, FigData)
-            if Settings.Show_Plots
+            if Settings.Display.IndividualPlots
                 f = figure('visible', 'on');
             else
                 f = figure('visible', 'off');
@@ -23,8 +23,8 @@ classdef Plot
         end % f = VisualizeSlicesCutOff
         
         function f = VisualizeSlices(Settings, FigData)
-            if Settings.Plot_VisualizeSlices && (Settings.Save_Figures || Settings.Show_Plots)
-                if Settings.Show_Plots
+            if Settings.Plot_VisualizeSlices && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
                     f = figure('visible', 'on');
                 else
                     f = figure('visible', 'off');
@@ -52,8 +52,8 @@ classdef Plot
         end % f = VisualizeSlices
         
         function f = SingleSliceAnalysis(Settings, FigData)
-            if Settings.Plot_SingleSlice && (Settings.Save_Figures || Settings.Show_Plots)
-                if Settings.Show_Plots
+            if Settings.Plot_SingleSlice && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
                     f = figure('visible', 'on');
                 else
                     f = figure('visible', 'off');
@@ -90,8 +90,8 @@ classdef Plot
         end % f = SingleSliceAnalysis
         
         function f = Surface(Settings, FigData)
-            if Settings.Plot_Surface && (Settings.Save_Figures || Settings.Show_Plots)
-                if Settings.Show_Plots
+            if Settings.Plot_Surface && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
                     f = figure('visible', 'on');
                 else
                     f = figure('visible', 'off');
@@ -110,8 +110,8 @@ classdef Plot
         end % f = Surface
         
         function f = Contour(Settings, FigData)
-            if Settings.Plot_Contour && (Settings.Save_Figures || Settings.Show_Plots)
-                if Settings.Show_Plots
+            if Settings.Plot_Contour && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
                     f = figure('visible', 'on');
                 else
                     f = figure('visible', 'off');
@@ -153,29 +153,13 @@ classdef Plot
         end % f = Contour
         
         function f = AverageHeight(Settings, FigData)
-            if Settings.Plot_AverageHeight && (Settings.Save_Figures || Settings.Show_Plots)
-                if Settings.Show_Plots
+            if Settings.Plot_AverageHeight && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
                     f = figure('visible', 'on');
                 else
                     f = figure('visible', 'off');
                 end
-                
-                data_cell = {FigData.data_cell};
-                data_cell_noempties = data_cell(cellfun(@(x) ~isempty(x), data_cell));
-                A = cellfun(@(x) x(:,3), data_cell_noempties, 'UniformOutput', false);
-                array_sizes = cellfun(@(x) length(x(find(~isnan(x),1):end)), A); %exclude leading nans
-                shortest_array = min(array_sizes(array_sizes ~= 0));
-
-                B = nan(length(A), shortest_array);
-                for i = 1:length(A)
-                    if max(~isnan(A{i}))
-                        first_nonnan = find(~isnan(A{i}),1);
-                        data = A{i}(first_nonnan:end);
-                        B(i, :) = data(end-shortest_array+1:end);
-                    end
-                end
-                mean_array = mean(B, 'omitnan');
-                plot(mean_array, 'LineWidth', 3)
+                plot(FigData.HeightProfile_Mean, 'LineWidth', 3)
                 xlabel('Distance from center[pix]')
                 ylabel('Height [um]')
             else
@@ -183,10 +167,31 @@ classdef Plot
             end
         end % f = AverageHeight
         
+        function f = AverageHeight_AllImages(Settings, FigData)
+            if Settings.Plot_AverageHeightAllImages && (Settings.Save_Figures || Settings.Display.TotalPlots)
+                if Settings.Display.TotalPlots
+                    f = figure('visible', 'on');
+                else
+                    f = figure('visible', 'off');
+                end
+                hold on
+                map = parula(length(FigData.HeightProfile_Mean_AllImages));
+                for i = 1:length(FigData.HeightProfile_Mean_AllImages)
+                   plot(FigData.HeightProfile_Mean_AllImages{i}, 'LineWidth', 3, 'Color', map(i,:))
+                end
+                xlabel('Distance from center[pix]')
+                ylabel('Height [um]')
+%                 colormap parula
+%                 colorbar
+            else
+                f = [];
+            end
+        end % f = AverageHeight_AllImages
+        
         
 %         function f = AverageHeight(Settings, FigData)
-%             if Settings.Plot_AverageHeight && (Settings.Save_Figures || Settings.Show_Plots)
-%                 if Settings.Show_Plots
+%             if Settings.Plot_AverageHeight && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+%                 if Settings.Display.IndividualPlots
 %                     f = figure('visible', 'on');
 %                 else
 %                     f = figure('visible', 'off');
@@ -195,7 +200,6 @@ classdef Plot
 %                 f = [];
 %             end
 %         end % f = AverageHeight
-        
         
     end
 end
