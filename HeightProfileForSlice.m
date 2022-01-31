@@ -22,7 +22,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % check if splitting is possible if CutOff isset.
     if Settings.CutOff && Settings.CutOffValue > length(c)
         Logging(1, append('The CutOff value (', num2str(Settings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
-    else
+    elseif Settings.CutOff
         Settings.CutOffValue = length(c) - Settings.CutOffValue;
     end
     c_nor = (c-min(c))/(max(c)-min(c));

@@ -2,11 +2,7 @@ classdef Plot
     methods (Static)
         
         function Analyze_TwoParts_CutOff = VisualizeSlicesCutOff(Settings, FigData)
-            if Settings.Display.IndividualPlots
-                f = figure('visible', 'on');
-            else
-                f = figure('visible', 'off');
-            end
+            f = figure('visible', 'on');
             imshow(FigData.I)
             hold on
             for k = 1:length(FigData.theta_all)
@@ -160,8 +156,8 @@ classdef Plot
                     f = figure('visible', 'off');
                 end
                 plot(FigData.HeightProfile_Mean, 'LineWidth', 3)
-                xlabel('Distance from center[pix]')
-                ylabel('Height [um]')
+                xlabel('Distance from center [pix]')
+                ylabel('Height [$\mu$m]')
             else
                 f = [];
             end
@@ -177,12 +173,25 @@ classdef Plot
                 hold on
                 map = parula(length(FigData.HeightProfile_Mean_AllImages));
                 for i = 1:length(FigData.HeightProfile_Mean_AllImages)
-                   plot(FigData.HeightProfile_Mean_AllImages{i}, 'LineWidth', 3, 'Color', map(i,:))
+                    datapoints = length(FigData.HeightProfile_Mean_AllImages{i});
+                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, FigData.HeightProfile_Mean_AllImages{i} * 10e6, 'LineWidth', 2, 'Color', map(i,:))
                 end
-                xlabel('Distance from center[pix]')
-                ylabel('Height [um]')
-%                 colormap parula
-%                 colorbar
+%                 legend(append('t=', compose('%g', Settings.TimeRange), 's'))
+                xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
+                ylabel('Height [µm]')
+                if max(Settings.TimeRange) > 600
+                    stepsize = round((max(Settings.TimeRange)/60-min(Settings.TimeRange/60))/5);
+                    barticks = min(Settings.TimeRange):stepsize:max(Settings.TimeRange);
+                    c = colorbar('TickLabels', barticks, 'Ticks', linspace(0,1,6));
+                    ylabel(c, 'Time [min]', 'FontSize', Settings.PlotFontSize)
+                else
+                    stepsize = round((max(Settings.TimeRange)-min(Settings.TimeRange))/5);
+                    barticks = min(Settings.TimeRange):stepsize:max(Settings.TimeRange);
+                    c = colorbar('TickLabels', barticks, 'Ticks', linspace(0,1,6));
+                    ylabel(c, 'Time [s]', 'FontSize', Settings.PlotFontSize)
+                end
+                xlim([0, max(cellfun(@(x) length(x), FigData.HeightProfile_Mean_AllImages)) / Settings.ConversionFactorPixToMm])
+                ylim([0, max(cellfun(@(x) max(x), FigData.HeightProfile_Mean_AllImages))* 10e6]) %cell2mat needed if HeightProfile_Mean_AllImages contains empty cells
             else
                 f = [];
             end
