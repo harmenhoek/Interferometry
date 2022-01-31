@@ -23,6 +23,15 @@ FIXES TODO
 - ESTIMATE remaining time left, based on average iteration time of each
 loop + extra at the end.
 
+- For Settings.EstimateOutsides, show where the expected minima is going to
+be.
+- Select reference distance: where all the slices have the same length
+(point that can't be missed)
+- Ignore inside data. 
+- Plotting fails for Settings.Analyze_TwoParts_CutOff
+now
+- function AverageHeight, fix distance from center.
+
 %} 
 
 
@@ -40,36 +49,40 @@ loop + extra at the end.
 
 % Settings.Source = 'data\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_36.tiff';
 
-% Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
-% Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
-% Settings.Analyze_TwoParts_CutOff = 1473;
-% Settings.TimeInterval = 10;
-% Settings.ZeisLensMagnification = 'x5'; % if not set, pixels will be use as unit.
-% Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
-% Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
-% % Peak fitting settings
-% % if Settings.Analyze_TwoParts is false, inside settings are used for all data
-% Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-% Settings.MinPeakDistance_inside = 15;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-% Settings.MinPeakProminence_inside = 0.15;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-%     Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-%     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-%     Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
-%     Settings.Analyze_TwoPart_IncludeMargin = true; % include inside data (up to first extrema) into outside, to enhance peak finding.
-Settings.ImageProcessing.EnhanceContrast = true;
-
-Settings.Source = 'data\20220131_test\Basler_a2A5328-15ucBAS__40087133__20220131_142549018_1.tiff';
+Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
+Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
+Settings.Analyze_TwoParts_CutOff = 1473;
 Settings.TimeInterval = 10;
-Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
-Settings.Interferometry_Center = [4533.5 735.5];
-Settings.SectorStart = pi/2 + pi/8;      % Clockwise from 3 o'clock. 
-Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
-Settings.Analyze_TwoParts = false;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 50;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 500;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = .3;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-Settings.ImageProcessing.EnhanceContrast = false;
-Settings.IgnoreInside = true;  % TODO
+Settings.ZeisLensMagnification = 'x5'; % if not set, pixels will be use as unit.
+Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
+Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
+% Peak fitting settings
+% if Settings.Analyze_TwoParts is false, inside settings are used for all data
+Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.MinPeakDistance_inside = 15;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+Settings.MinPeakProminence_inside = 0.15;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+    Settings.Analyze_TwoPart_IncludeMargin = true; % include inside data (up to first extrema) into outside, to enhance peak finding.
+Settings.ImageProcessing.EnhanceContrast = true;
+Settings.IgnoreInside = false;
+
+% % Settings.Source = 'data\20220131_test\Basler_a2A5328-15ucBAS__40087133__20220131_142549018_1.tiff';
+% Settings.Source = 'data\20220131_test\';
+% Settings.TimeInterval = 30*60;
+% Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
+% Settings.Interferometry_Center = [4533.5 735.5];
+% Settings.SectorStart = pi/2 + pi/8;      % Clockwise from 3 o'clock. 
+% Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
+% Settings.Analyze_TwoParts = false;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+% Settings.Smoothing_inside = 250;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+% Settings.MinPeakDistance_inside = 80;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+% Settings.MinPeakProminence_inside = .15;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+% Settings.ImageProcessing.EnhanceContrast = false;
+% Settings.IgnoreInside = true;
+% Settings.Analyze_TwoParts_CutOff = 1618;
 
 
 %{
@@ -90,9 +103,9 @@ Optional settings
 Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
 Settings.RefractiveIndex_Medium = 1.4329;
 
-Settings.ImageSkip = 25;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
+Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
-Settings.NumberSlices = 200;                     % Total number of radial slices in the full 2pi
+Settings.NumberSlices = 400;                     % Total number of radial slices in the full 2pi
 Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
 %     Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
 %     Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
@@ -130,8 +143,8 @@ Settings.PlotFontSize = 15;
 % Saving
 Settings.Save_Figures = true;
     Settings.Save_PNG = true;
-    Settings.Save_TIFF = false;
-    Settings.Save_FIG = false;
+    Settings.Save_TIFF = true;
+    Settings.Save_FIG = true;
     Settings.Save_Folder = 'results';
 Settings.Save_Data = true;
 
@@ -223,6 +236,7 @@ if Settings.PeakFitSettings.CutOff
     Settings.PeakFitSettings.b.MinPeakDistance = Settings.MinPeakDistance_outside;
     Settings.PeakFitSettings.b.Smoothing = Settings.Smoothing_outside;
 end
+Settings.PeakFitSettings.CutOffIncludeMargin = Settings.Analyze_TwoPart_IncludeMargin;
 
 
 % Settings.Source = 'data\';
@@ -325,7 +339,7 @@ end
 % Determine if to plot individual plots or not
 if Settings.Display.IndividualPlots && length(Settings.Analysis_ImageList) > 2
     Logging(2, 'There are more than 2 images in the selected folder, and Show_Plots is on. This can significantly slow down your computer. Do you wish to continue, or turn off Show_Plots?')
-    x = input('Y/N [N]  ','s');
+    x = input('Y (keep on) / N (turn off) [N]  ','s');
     if isempty(x) || strcmpi(x, 'N')
         Settings.Display.IndividualPlots = false;
         Logging(5, 'Showing plots to screen is turned off.')
@@ -350,7 +364,6 @@ elseif isfield(Settings, 'ZeisLensMagnification')
     end    
 end
 
-
 clear ext steps maxres minres status msg path name extensions savefolder_sub images_fullpath images
 Logging(6, 'Settings checked and all valid.')
 
@@ -358,7 +371,7 @@ tic
 
 %% 1 - Image loading
 
-Logging(5, '-- 1/6 -- Image loading started.')
+Logging(5, '---- Image loading started.')
 
 I_or = imread(Settings.Analysis_ImageList{1});
 I = rgb2gray(I_or);
@@ -384,7 +397,7 @@ Logging(6, 'Image loaded successfully.')
 
 %% 2 - Determine slices
 
-Logging(5, '-- 2/6 -- Slice determining started.')
+Logging(5, '---- Slice determining started.')
 
 points = nan(length(theta_all), 2);
 
@@ -395,9 +408,11 @@ for k = 1:length(theta_all)
 end
 
 % Select TwoPart CutOff point
-if Settings.Analyze_TwoParts && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
+if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
     Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
     Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I,  'theta_all',theta_all, 'points',points));
+end
+if Settings.Analyze_TwoParts || Settings.IgnoreInside
     Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
 end
 
@@ -411,22 +426,21 @@ Logging(6, 'Slices determined successfully.')
 
 %% X - Iterate over all images
 
-Logging(5, '-- 3/6 -- Height Profile calculations started.')
-
+Logging(5, '---- Height Profile calculations started.')
 
 HeightProfiles_ForSlices_AllImages = cell(1, length(Settings.Analysis_ImageList));
 HeightProfile_Mean_AllImages = cell(1, length(Settings.Analysis_ImageList));
+TimePerImage = nan(1, Settings.ImageCount);
 
 for i = 1:Settings.ImageCount
+    tStart = tic;
     Image = Settings.Analysis_ImageList{i};
     
-%     if mod(num2str((i-1)/Settings.ImageSkip), round(length(1:Settings.ImageSkip:Settings.ImageCount)/10)) == 0 % MAKE THIS 10% smart! If a lot of images, show more often.
-    if mod(num2str(i), round(Settings.ImageCount/10)) == 0
-        Logging(5, append("~~~~~~ Height profile calculations for all images at ", num2str(round(i/Settings.ImageCount*10)*10), "% ~~~~~~"))
-    end
+%     if mod(num2str(i), round(Settings.ImageCount/10)) == 0
+%         Logging(5, append("~~~~~~ Height profile calculations for all images at ", num2str(round(i/Settings.ImageCount*10)*10), "% ~~~~~~"))
+%     end
 
     if mod(i, Settings.Display.ImageProgressValue) == 0 && Settings.Display.ImageProgress
-%         Logging(6, append("Image ", num2str((i-1)/Settings.ImageSkip+1), "/", num2str(length(1:Settings.ImageSkip:Settings.ImageCount)), ' being processed.'))
         Logging(6, append("Image ", num2str(i), "/", num2str(Settings.ImageCount), ' being processed.'))
     end
     
@@ -450,6 +464,10 @@ for i = 1:Settings.ImageCount
         roi = [pnt; Settings.Interferometry_Center];
 
         [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+        if Settings.IgnoreInside 
+            d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
+        end
+
         if isnan(d_final)
             no_height_profile = no_height_profile + 1;
         end
@@ -550,9 +568,20 @@ for i = 1:Settings.ImageCount
     
     clear f5 f6 f7 f8 data data_all
     
+    TimePerImage(i) = toc(tStart);
+    if Settings.ImageCount > 1
+        TimeRemaining = (Settings.ImageCount-i)*mean(TimePerImage, 'omitnan') + 1.6;  % 1.6 for rest of code.
+        if TimeRemaining < 90 && TimeRemaining > 1
+            Logging(5, append('Estimated time remaining: ', num2str(round(TimeRemaining)), ' seconds.'))
+        else
+            Logging(5, append('Estimated time remaining: ', num2str(round(TimeRemaining/60)), ' minutes.'))
+        end
+    end
 end % iterate over all images
 
-clear i
+clear i tStart TimeRemaining
+
+t3 = tic;
 
 %% X - Plot total data
 
@@ -563,7 +592,7 @@ end
 
 %% 6 - Save data
 
-Logging(5, '-- 6/6 -- Saving data started.')
+Logging(5, '---- Saving data started.')
 
 % Show amount of data that is being saved.
 
@@ -585,6 +614,7 @@ elapsedtime = toc;
 Logging(5, append('Code finished successfully in ', num2str(round(elapsedtime)), ' seconds.'))
 
 clear elapsedtime
+toc(t3)
 
 %% Functions
 

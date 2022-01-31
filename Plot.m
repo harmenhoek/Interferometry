@@ -67,18 +67,18 @@ classdef Plot
                 nexttile;
                 line(c_l, FigData.c_nor, 'Color', 'red', 'LineWidth', 2)
                 hold on
-                plot(c_l(FigData.pks_locs), FigData.pks, '.', 'MarkerSize', 10, 'Color', 'black')
-                plot(c_l(FigData.mns_locs), -FigData.mns, '.', 'MarkerSize', 10, 'Color', 'green')
+                plot(c_l(FigData.pks_locs), FigData.pks, '.', 'MarkerSize', 20, 'Color', 'black')
+                plot(c_l(FigData.mns_locs), -FigData.mns, '.', 'MarkerSize', 20, 'Color', 'green')
                 xlabel('Distance from center [pix]')
                 ylabel('Intensity [arb. units]')
                 xlim([0, max(c_l)])
                 title('After img adjustments and normalization')
 
                 nexttile;
-                plot(c_l, FigData.d_final.*1e6, 'Color', 'blue', 'LineWidth', 2)
-                xlabel('Distance from center [pix]')
+                plot(c_l ./ Settings.ConversionFactorPixToMm, FigData.d_final.*1e6, 'Color', 'blue', 'LineWidth', 2)
+                xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
                 ylabel('Height [um]')
-                xlim([0, max(c_l)])
+                xlim([0, max(c_l) ./ Settings.ConversionFactorPixToMm])
                 title('Height profile after model fit')
             else
                 f = [];
@@ -155,9 +155,9 @@ classdef Plot
                 else
                     f = figure('visible', 'off');
                 end
-                plot(FigData.HeightProfile_Mean, 'LineWidth', 3)
-                xlabel('Distance from center [pix]')
-                ylabel('Height [$\mu$m]')
+                plot((1:length(FigData.HeightProfile_Mean)) ./ Settings.ConversionFactorPixToMm, FigData.HeightProfile_Mean * 10e6, 'LineWidth', 3)
+                xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
+                ylabel('Height [µm]')
             else
                 f = [];
             end
