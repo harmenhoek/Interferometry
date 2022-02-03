@@ -1,4 +1,4 @@
-function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, lambda, HeightResolution, EstimateOutsides, Settings)
+function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, lambda, HeightResolution, EstimateOutsides, Settings, c)
     %% Processing
     
     % The last term defines the length of the slice. This is needed since 
@@ -17,7 +17,9 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % and b are so confusingly used here. Better would be to rewrite
     % function to work from inside to outside ...
 
-    c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
+    if ~exist('c', 'var')
+        c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
+    end
     
     % check if splitting is possible if CutOff isset.
     if Settings.CutOff && Settings.CutOffValue > length(c)

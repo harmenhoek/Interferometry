@@ -49,25 +49,25 @@ now
 
 % Settings.Source = 'data\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_36.tiff';
 
-Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
-Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
-Settings.Analyze_TwoParts_CutOff = 1473;
-Settings.TimeInterval = 10;
-Settings.ZeisLensMagnification = 'x5'; % if not set, pixels will be use as unit.
-Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
-Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
-% Peak fitting settings
-% if Settings.Analyze_TwoParts is false, inside settings are used for all data
-Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 15;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = 0.15;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
-    Settings.Analyze_TwoPart_IncludeMargin = true; % include inside data (up to first extrema) into outside, to enhance peak finding.
-Settings.ImageProcessing.EnhanceContrast = true;
-Settings.IgnoreInside = false;
+% Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
+% Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
+% Settings.Analyze_TwoParts_CutOff = 1473;
+% Settings.TimeInterval = 10;
+% Settings.ZeisLensMagnification = 'x5'; % if not set, pixels will be use as unit.
+% Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
+% Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
+% % Peak fitting settings
+% % if Settings.Analyze_TwoParts is false, inside settings are used for all data
+% Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+% Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+% Settings.MinPeakDistance_inside = 15;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+% Settings.MinPeakProminence_inside = 0.15;        % Peak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+%     Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+%     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+%     Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+%     Settings.Analyze_TwoPart_IncludeMargin = true; % include inside data (up to first extrema) into outside, to enhance peak finding.
+% Settings.ImageProcessing.EnhanceContrast = true;
+% Settings.IgnoreInside = false;
 
 % % Settings.Source = 'data\20220131_test\Basler_a2A5328-15ucBAS__40087133__20220131_142549018_1.tiff';
 % Settings.Source = 'data\20220131_test\';
@@ -83,6 +83,27 @@ Settings.IgnoreInside = false;
 % Settings.ImageProcessing.EnhanceContrast = false;
 % Settings.IgnoreInside = true;
 % Settings.Analyze_TwoParts_CutOff = 1618;
+
+Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_150.tiff';
+% Settings.Source = 'E:\20220201\';
+Settings.TimeInterval = 30;
+Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
+Settings.Interferometry_Center = [4485.5 729.5];
+Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
+Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
+Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.MinPeakDistance_inside = 50;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+Settings.MinPeakProminence_inside = .11;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+Settings.ImageProcessing.EnhanceContrast = false;
+Settings.IgnoreInside = false;
+Settings.Analyze_TwoParts_CutOff = 1126;
+
+% TODO: settings wizard for analysis settings! Choose prominance etc
+% TODO: make MinPeakProminance settings to orginal image!
 
 
 %{
@@ -103,9 +124,11 @@ Optional settings
 Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
 Settings.RefractiveIndex_Medium = 1.4329;
 
+Settings.Anlysismode_averaging = 2; % 1 is height profile for each line, than average. 2 is average first, than height profile for single line.
+
 Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
-Settings.NumberSlices = 400;                     % Total number of radial slices in the full 2pi
+Settings.NumberSlices = 1600;                     % Total number of radial slices in the full 2pi
 Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
 %     Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
 %     Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
@@ -117,7 +140,7 @@ Settings.FilterBy_AmountExtrema = false;         % TODO needs some work, when so
 
 Settings.HeightResolution = 2e-9;                % Resolution of model fitting. Minimal step size in end result is determined by this. 2nm is decent.
 
-Settings.PlotSingleSlice = 4;                    % Show several analysis steps of a certain slice.
+Settings.PlotSingleSlice = 50;                    % Show several analysis steps of a certain slice.
 
 % Display settings (things that show while code is running)
 Settings.Display.IndividualPlots = true;  % only determines showing them to screen, if false, Save_Figures still works.
@@ -132,12 +155,12 @@ Settings.Display.LogoAtStart = true;
 Settings.Plot_VisualizeSlices = true;
 Settings.Plot_SingleSlice = true;
 Settings.Plot_Surface = false; % not working properly
-Settings.Plot_Contour = true;
+Settings.Plot_Contour = false;
     Settings.Plot_Contour_OverlayOnImage = true;
     Settings.Plot_Contour_Levels = 10;
     Settings.Plot_Contour_Transparency = 0.6;
-Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
-Settings.Plot_AverageHeightAllImages = true;
+Settings.Plot_AverageHeight = false;                    % Calculate average multiple slices (consider analyzing only a quadrant).
+Settings.Plot_AverageHeightAllImages = false;
 Settings.PlotFontSize = 15;
 
 % Saving
@@ -411,6 +434,7 @@ end
 if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
     Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
     Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I,  'theta_all',theta_all, 'points',points));
+    Logging(5, append('Cutoff point for TwoPart analysis (or cutoff) Settings.Analyze_TwoParts_CutOff = ', num2str(Settings.Analyze_TwoParts_CutOff), '.'))
 end
 if Settings.Analyze_TwoParts || Settings.IgnoreInside
     Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
@@ -453,24 +477,71 @@ for i = 1:Settings.ImageCount
     HeightProfiles_ForSlices = cell(length(theta_all) ,1);
     number_extrema = nan(length(theta_all), 2);
     slice_lengths = nan(length(theta_all), 1);
+        
+    
+    if Settings.Anlysismode_averaging == 1
 
-    no_height_profile = 0;
-    first_empty_row = 1;
-    for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
-        if mod(k, round(length(theta_all)/Settings.Display.HeightProfileProgressValue)) == 0 && Settings.Display.HeightProfileProgress
-            Logging(6, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/(length(theta_all)/10)*10), '%.'))
+        no_height_profile = 0;
+        first_empty_row = 1;
+        for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
+            if mod(k, round(length(theta_all)/Settings.Display.HeightProfileProgressValue)) == 0 && Settings.Display.HeightProfileProgress
+                Logging(6, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/(length(theta_all)/10)*10), '%.'))
+            end
+            pnt = floor(points(k, :));
+            roi = [pnt; Settings.Interferometry_Center];
+    
+            [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+            if Settings.IgnoreInside 
+                d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
+            end
+    
+            if isnan(d_final)
+                no_height_profile = no_height_profile + 1;
+            end
+            number_extrema(k, 1:2) = [length(pks), length(mns)];
+            slice_lengths(k) = length(c_or);
+    
+            [xx, yy] = fillline(Settings.Interferometry_Center, pnt, length(d_final));
+            if length(d_final) ~= 1
+                HeightProfiles_ForSlices{k} = [xx', yy', d_final'];
+                first_empty_row = first_empty_row + length(xx);
+            end
+    
+    
+            % Plot one slice
+            if k == Settings.PlotSingleSlice
+                f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
+                SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
+                if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
+            end
+    
+            clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final
+    
+        end % iteration over all slices
+    elseif Settings.Anlysismode_averaging == 2
+        
+        no_height_profile = 0;
+        first_empty_row = 1;
+        cel_AllSlices = cell(1,length(points));
+        for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
+            pnt = floor(points(k, :));
+            roi = [pnt; Settings.Interferometry_Center];
+            cel_AllSlices{k} = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
         end
-        pnt = floor(points(k, :));
-        roi = [pnt; Settings.Interferometry_Center];
-
-        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+        max_length = max(cellfun(@(x) length(x), cel_AllSlices));
+        arr_AllSlices = nan(length(points), max_length);
+        for i=1:length(cel_AllSlices)
+            arr_AllSlices(i,1:length(cel_AllSlices{i})) = cel_AllSlices{i};
+            arr_AllSlices(i,max_length-length(cel_AllSlices{i})+1:end) = cel_AllSlices{i};
+        end
+        arr_AverageSlice = mean(arr_AllSlices,1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
+        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings, arr_AverageSlice);
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
         end
 
-        if isnan(d_final)
-            no_height_profile = no_height_profile + 1;
-        end
+        %TODO: check if nan. PLUS LOT OF REDUDANT CODE NOW. 
+
         number_extrema(k, 1:2) = [length(pks), length(mns)];
         slice_lengths(k) = length(c_or);
 
@@ -480,17 +551,16 @@ for i = 1:Settings.ImageCount
             first_empty_row = first_empty_row + length(xx);
         end
 
-
         % Plot one slice
-        if k == Settings.PlotSingleSlice
-            f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
-            SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
-            if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
-        end
+        f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
+        if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
 
         clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final
 
-    end % iteration over all slices
+    end
+
+        return
 
     if no_height_profile == length(points)
         Logging(1, 'No height profiles could be calculated for any of the slices. Check if slices are not to short')
@@ -581,8 +651,6 @@ end % iterate over all images
 
 clear i tStart TimeRemaining
 
-t3 = tic;
-
 %% X - Plot total data
 
 if Settings.ImageCount > 1
@@ -614,7 +682,6 @@ elapsedtime = toc;
 Logging(5, append('Code finished successfully in ', num2str(round(elapsedtime)), ' seconds.'))
 
 clear elapsedtime
-toc(t3)
 
 %% Functions
 
