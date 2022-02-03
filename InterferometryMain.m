@@ -85,7 +85,7 @@ now
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
 % Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_176.tiff';
-Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
+Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
 % Settings.Source = 'data\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
@@ -165,12 +165,12 @@ Settings.Plot_AverageHeightAllImages = true;
 Settings.PlotFontSize = 15;
 
 % Saving
-Settings.Save_Figures = true;
+Settings.Save_Figures = false;
     Settings.Save_PNG = true;
     Settings.Save_TIFF = true;
     Settings.Save_FIG = true;
     Settings.Save_Folder = 'results';
-Settings.Save_Data = true;
+Settings.Save_Data = false;
 
 % Peak fitting settings
 Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on
@@ -538,12 +538,6 @@ for i = 1:Settings.ImageCount
         arr_AverageSlice = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
         
         [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings, arr_AverageSlice');
-% my best guess is that the HeightProfileForSlice is not working properly,
-% i.e. the model fitting is not done correctly and/or the stitching
-% afterwards. With method 1 this problem was hidden ...
-%             pnt = floor(points(50, :));  
-%             roi = [pnt; Settings.Interferometry_Center];
-%             [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
 
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;

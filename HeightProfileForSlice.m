@@ -20,6 +20,8 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     if ~exist('c', 'var')
         c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)'));
     end
+    c(1:10) = nan;
+    c(end-10:end) = nan;
     
     % check if splitting is possible if CutOff isset.
     if Settings.CutOff && Settings.CutOffValue > length(c)
@@ -273,30 +275,13 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     
     %% Stitching data together.
     
-    sum_tot = 0;
-    for i = 1:length(d_all)
-        sum_tot = sum_tot + length(d_all{i});
+    %updated: 3-2-2022
+    lastvalues = cumsum(cellfun(@(x) x(find(~isnan(x), 1, 'last')), d_all)); %exlude nans
+    for i=2:length(d_all)
+        d_all{i} = d_all{i} + lastvalues(i-1);
     end
-    for i = 2:length(d_all) % add steps together to smooth line
-        if max(d_all{i}) == 1  % if there is a single nan, skip entire step (TODO BETTER)
-            d_all{i} = d_all{i}; % keep nan
-        else
-            k = i;
-            prev_val = d_all{k-1}(end);  % TODO what if ONLY last value is nan? Might then still cause a step in the data, since it taks the prev then
-            while isnan(prev_val)
-                k = k-1;
-                if k == 1 % no prev dataset. keep as is
-                    prev_val = 0;
-                    break
-                end
-                prev_val = d_all{k-1}(end);
-            end
-            d_all{i} = d_all{i} + prev_val; 
-            %d_all{i} = d_all{i} + max(d_all{i-1}); % TODO: what to do if nan?
-        end
-    end
-    
-    d_final = cell2mat(d_all);  %flip because c=0 is center of image.
+    d_final = cell2mat(d_all);
+
     
     %% Flipping data
     % We want distance=0 to be center of the image. TODO test if it works
@@ -311,6 +296,5 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     mns_locs = -mns_locs + length(c);
         
    
-
 
 end % function ProfileSLice

@@ -3,7 +3,7 @@ function height = ModelFit(intensity, wavelength, HeightResolution)
     % This most simple approach uses the fact that between 2 interferometry
     % peaks, the distance traveled by the light is lambda/2. The shape of
     % the interference pattern is ~cos(kx-wt).
-    meth = 'cosine';
+    meth = 'ana_cosine';
 
     if strcmpi(meth, 'cosine')
         LUT_datapoints = (wavelength/4) / HeightResolution;
@@ -40,8 +40,16 @@ function height = ModelFit(intensity, wavelength, HeightResolution)
                 height(j) = d_mod2(indexOfMin)-wavelength/4;
             end
         end
-    end  % strcmpi(meth, 'cosine')
+    elseif strcmpi(meth, 'ana_cosine')  % analytical solution.
+        if intensity(end) < intensity(1) % 1st part down: 0 till lambda/4
+            height = wavelength*acos(2*intensity-1)/(4*pi);
+        else
+            intensity = -intensity + 1; % flip
+            height = wavelength*acos(2*intensity-1)/(4*pi);
+        end
+        height = height';
 
+    end  % strcmpi(meth, 'cosine')
 
 
 %     if partial
