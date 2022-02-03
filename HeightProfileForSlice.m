@@ -18,7 +18,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % function to work from inside to outside ...
 
     if ~exist('c', 'var')
-        c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
+        c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)'));
     end
     
     % check if splitting is possible if CutOff isset.
@@ -36,7 +36,6 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     else
         c_nor = smoothdata(c_nor, 'gaussian', Settings.a.Smoothing);
     end
-
     
     
     % catch really short slices

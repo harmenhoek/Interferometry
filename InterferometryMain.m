@@ -84,23 +84,24 @@ now
 % Settings.IgnoreInside = true;
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
-Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_150.tiff';
-% Settings.Source = 'E:\20220201\';
+% Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_176.tiff';
+Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
+% Settings.Source = 'data\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
 Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
 Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
 Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 50;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = .11;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 200;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+Settings.Smoothing_inside = 0.1;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.MinPeakDistance_inside = 18;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+Settings.MinPeakProminence_inside = .10;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 0.1;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
     Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;
 Settings.IgnoreInside = false;
-Settings.Analyze_TwoParts_CutOff = 1126;
+Settings.Analyze_TwoParts_CutOff = 1350;
 
 % TODO: settings wizard for analysis settings! Choose prominance etc
 % TODO: make MinPeakProminance settings to orginal image!
@@ -126,7 +127,7 @@ Settings.RefractiveIndex_Medium = 1.4329;
 
 Settings.Anlysismode_averaging = 2; % 1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 
-Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
+Settings.ImageSkip = 2;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
 Settings.NumberSlices = 1600;                     % Total number of radial slices in the full 2pi
 Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
@@ -159,8 +160,8 @@ Settings.Plot_Contour = false;
     Settings.Plot_Contour_OverlayOnImage = true;
     Settings.Plot_Contour_Levels = 10;
     Settings.Plot_Contour_Transparency = 0.6;
-Settings.Plot_AverageHeight = false;                    % Calculate average multiple slices (consider analyzing only a quadrant).
-Settings.Plot_AverageHeightAllImages = false;
+Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
+Settings.Plot_AverageHeightAllImages = true;
 Settings.PlotFontSize = 15;
 
 % Saving
@@ -202,8 +203,8 @@ end
 Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 
 % Set default plotting sizes
-set(0,'defaultAxesFontSize', Settings.PlotFontSize)
-set(gca,'TickLabelInterpreter','latex')
+set(0,'defaultAxesFontSize', Settings.PlotFontSize);
+% set(gca,'TickLabelInterpreter','latex');
 
 status = CheckIfClass('numeric', {'Settings.Lambda', 'Settings.PlotSingleSlice', 'Settings.NumberSlices', 'Settings.SectorStart', 'Settings.SectorEnd', 'Settings.Display.ImageProgressValue', 'Settings.Display.HeightProfileProgressValue'});
 status2 = CheckIfClass('logical', {'Settings.AnalyzeSector', 'Settings.Display.HeightProfileProgress', 'Settings.Display.HeightProfileProgress', 'Settings.FilterBy_AmountExtrema', 'Settings.Plot_AverageHeight', 'Settings.Save_Figures', 'Settings.Save_PNG', 'Settings.Save_TIFF', 'Settings.Save_FIG', 'Settings.Display.LogoAtStart'});
@@ -357,7 +358,7 @@ if Settings.Save_Figures
     end
 end
 
-% Check if all images are same size
+% TODO:  Check if all images are same size
 
 % Determine if to plot individual plots or not
 if Settings.Display.IndividualPlots && length(Settings.Analysis_ImageList) > 2
@@ -454,7 +455,7 @@ Logging(5, '---- Height Profile calculations started.')
 
 HeightProfiles_ForSlices_AllImages = cell(1, length(Settings.Analysis_ImageList));
 HeightProfile_Mean_AllImages = cell(1, length(Settings.Analysis_ImageList));
-TimePerImage = nan(1, Settings.ImageCount);
+TimePerImage = nan(1, length(Settings.Analysis_ImageList));
 
 for i = 1:Settings.ImageCount
     tStart = tic;
@@ -530,18 +531,25 @@ for i = 1:Settings.ImageCount
         end
         max_length = max(cellfun(@(x) length(x), cel_AllSlices));
         arr_AllSlices = nan(length(points), max_length);
-        for i=1:length(cel_AllSlices)
-            arr_AllSlices(i,1:length(cel_AllSlices{i})) = cel_AllSlices{i};
-            arr_AllSlices(i,max_length-length(cel_AllSlices{i})+1:end) = cel_AllSlices{i};
+        for m=1:length(cel_AllSlices)
+            arr_AllSlices(m,1:length(cel_AllSlices{m})) = cel_AllSlices{m};
+            arr_AllSlices(m,max_length-length(cel_AllSlices{m})+1:end) = cel_AllSlices{m};
         end
-        arr_AverageSlice = mean(arr_AllSlices,1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
-        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings, arr_AverageSlice);
+        arr_AverageSlice = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
+        
+        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings, arr_AverageSlice');
+% my best guess is that the HeightProfileForSlice is not working properly,
+% i.e. the model fitting is not done correctly and/or the stitching
+% afterwards. With method 1 this problem was hidden ...
+%             pnt = floor(points(50, :));  
+%             roi = [pnt; Settings.Interferometry_Center];
+%             [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
         end
 
         %TODO: check if nan. PLUS LOT OF REDUDANT CODE NOW. 
-
         number_extrema(k, 1:2) = [length(pks), length(mns)];
         slice_lengths(k) = length(c_or);
 
@@ -556,11 +564,12 @@ for i = 1:Settings.ImageCount
         SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
         if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
 
-        clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final
+        HeightProfile_Mean = d_final;
+%         clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final
 
     end
 
-        return
+
 
     if no_height_profile == length(points)
         Logging(1, 'No height profiles could be calculated for any of the slices. Check if slices are not to short')
@@ -592,40 +601,46 @@ for i = 1:Settings.ImageCount
         clear k MedianExtrema TotalExtrema cntr
     end
 
-    % Convert to single array and Remove NaNs
-    data_all = vertcat(HeightProfiles_ForSlices{:});
-    data_all(any(isnan(data_all), 2), :) = []; % remove nan values
+    if Settings.Anlysismode_averaging == 1
+        % Convert to single array and Remove NaNs
+        data_all = vertcat(HeightProfiles_ForSlices{:});
+        data_all(any(isnan(data_all), 2), :) = []; % remove nan values
 
-    % Calculate HeightProfile_Mean of all slices
-    HeightProfiles_ForSlices_noempties = HeightProfiles_ForSlices(cellfun(@(x) ~isempty(x), HeightProfiles_ForSlices));
-    A = cellfun(@(x) x(:,3), HeightProfiles_ForSlices_noempties, 'UniformOutput', false);
-    array_sizes = cellfun(@(x) length(x(find(~isnan(x),1):end)), A); %exclude leading nans
-    shortest_array = min(array_sizes(array_sizes ~= 0));
-    B = nan(length(A), shortest_array);
-    for l = 1:length(A)
-        if max(~isnan(A{l}))
-            first_nonnan = find(~isnan(A{l}),1);
-            data = A{l}(first_nonnan:end);
-            B(l, :) = data(end-shortest_array+1:end);
+        % Calculate HeightProfile_Mean of all slices
+        HeightProfiles_ForSlices_noempties = HeightProfiles_ForSlices(cellfun(@(x) ~isempty(x), HeightProfiles_ForSlices));
+        A = cellfun(@(x) x(:,3), HeightProfiles_ForSlices_noempties, 'UniformOutput', false);
+        array_sizes = cellfun(@(x) length(x(find(~isnan(x),1):end)), A); %exclude leading nans
+        shortest_array = min(array_sizes(array_sizes ~= 0));
+        B = nan(length(A), shortest_array);
+        for l = 1:length(A)
+            if max(~isnan(A{l}))
+                first_nonnan = find(~isnan(A{l}),1);
+                data = A{l}(first_nonnan:end);
+                B(l, :) = data(end-shortest_array+1:end);
+            end
         end
+        HeightProfile_Mean = mean(B, 'omitnan');
+        clear A B
+ 
     end
-    HeightProfile_Mean = mean(B, 'omitnan');
-    clear A B
     
     Logging(6, append('Filtering and postprocessing completed successfully for image ', num2str(i), '.'))
 
     %% 5 - Plotting of results
 
     Logging(6, append('Plotting of results started for image ', num2str(i), '.'))
-
-    f5 = Plot.Surface(Settings, struct('data_all',data_all));
-    SaveFigure(min([Settings.Save_Figures Settings.Plot_Surface]), f5, save_extensions, append(basename, '_Surface_', num2str(i)));
-    if ~Settings.Display.IndividualPlots; close(f5); end % must close, even if not visible, otherwise in memory
-
-    f7 = Plot.Contour(Settings, struct('I_or',I_or, 'data_all',data_all));
-    SaveFigure(min([Settings.Save_Figures Settings.Plot_Contour]), f7, save_extensions, append(basename, '_Contour', num2str(i)));
-    if ~Settings.Display.IndividualPlots; close(f7); end % must close, even if not visible, otherwise in memory
-
+    
+    if Settings.Anlysismode_averaging == 1
+        f5 = Plot.Surface(Settings, struct('data_all',data_all));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_Surface]), f5, save_extensions, append(basename, '_Surface_', num2str(i)));
+        if ~Settings.Display.IndividualPlots; close(f5); end % must close, even if not visible, otherwise in memory
+    
+        
+        f7 = Plot.Contour(Settings, struct('I_or',I_or, 'data_all',data_all));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_Contour]), f7, save_extensions, append(basename, '_Contour', num2str(i)));
+        if ~Settings.Display.IndividualPlots; close(f7); end % must close, even if not visible, otherwise in memory
+    end
+    
     f6 = Plot.AverageHeight(Settings, struct('HeightProfile_Mean',HeightProfile_Mean)); %TODO, take mean_array out of here!
     SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeight]), f6, save_extensions, append(basename, '_AverageSlice', num2str(i)));
     if ~Settings.Display.IndividualPlots; close(f6); end % must close, even if not visible, otherwise in memory
