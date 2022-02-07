@@ -86,7 +86,7 @@ now
 
 % Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_176.tiff';
 Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
-% Settings.Source = 'data\20220201\';
+% Settings.Source = 'E:\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
@@ -127,7 +127,9 @@ Settings.RefractiveIndex_Medium = 1.4329;
 
 Settings.Anlysismode_averaging = 2; % 1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 
-Settings.ImageSkip = 2;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
+Settings.Stitching_AveragePoints = 5;
+
+Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
 Settings.NumberSlices = 1600;                     % Total number of radial slices in the full 2pi
 Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
@@ -153,7 +155,7 @@ Settings.Display.HeightProfileProgress = false;       % Show progress of Height 
 Settings.Display.LogoAtStart = true;
     
 % Plotting
-Settings.Plot_VisualizeSlices = true;
+Settings.Plot_VisualizeSlices = false;
 Settings.Plot_SingleSlice = true;
 Settings.Plot_Surface = false; % not working properly
 Settings.Plot_Contour = false;
@@ -491,7 +493,7 @@ for i = 1:Settings.ImageCount
             pnt = floor(points(k, :));
             roi = [pnt; Settings.Interferometry_Center];
     
-            [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings);
+            [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings);
             if Settings.IgnoreInside 
                 d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
             end
@@ -537,7 +539,7 @@ for i = 1:Settings.ImageCount
         end
         arr_AverageSlice = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
         
-        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings.Lambda_Corrected, Settings.HeightResolution, Settings.EstimateOutsides, Settings.PeakFitSettings, arr_AverageSlice');
+        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, arr_AverageSlice');
 
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;

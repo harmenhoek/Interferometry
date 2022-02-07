@@ -41,26 +41,35 @@ function height = ModelFit(intensity, wavelength, HeightResolution)
             end
         end
     elseif strcmpi(meth, 'ana_cosine')  % analytical solution.
-        if intensity(end) < intensity(1) % 1st part down: 0 till lambda/4
-            height = wavelength*acos(2*intensity-1)/(4*pi);
-        else
+        intensity= flip(intensity);
+        if intensity(end) > intensity(1) % 1st part down: 0 till lambda/4
             intensity = -intensity + 1; % flip
+            height = wavelength*acos(2*intensity-1)/(4*pi);
+            intensity = -intensity + 1; % flip back for plotting purposes below
+        else
             height = wavelength*acos(2*intensity-1)/(4*pi);
         end
         height = height';
+    elseif strcmpi(meth, 'ana_linear')  % analytical solution.
+        intensity= flip(intensity);
+        if intensity(end) > intensity(1) % 1st part down: 0 till lambda/4
+            intensity = -intensity + 1; % flip
+            height = -(wavelength/4)*intensity+(wavelength/4);
+%             intensity = -intensity + 1; % flip back for plotting purposes below
+        else
+            height = -(wavelength/4)*intensity+(wavelength/4);
+        end
+        height = height';
+    end  % strcmpi(meth, '')
 
-    end  % strcmpi(meth, 'cosine')
-
-
+% partial = 1;
 %     if partial
-%         size(d_mod2)
-%         size(I_mod2)
 %         figure
 %         yyaxis left
-%         plot(I_mod2, d_mod2)
+%         plot(intensity)
 %         hold on
 %         yyaxis right
-%         plot(ydata, xdata)
+%         plot(height)
 %         title('MODEL')
 %     end
 end

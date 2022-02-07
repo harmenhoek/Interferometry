@@ -1,4 +1,4 @@
-function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, lambda, HeightResolution, EstimateOutsides, Settings, c)
+function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings, c)
     %% Processing
     
     % The last term defines the length of the slice. This is needed since 
@@ -8,10 +8,10 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % intensity = improfile(I, x_all, y_all, slice_length), where
     % length(intensity) is slice length.
 
-    % 24-1-2022 => added split smoothing and peak fit settings. So slice
-    % can have different slice settings for inside (a) and outside (b).
-    % 24-1-2022 => Implemented Settings struct. Settings are passed in 
-    % function with Settings.a.MinPeakProminence, etc.
+    % 24-1-2022 => added split smoothing and peak fit Settings.PeakFitSettings. So slice
+    % can have different slice Settings.PeakFitSettings for inside (a) and outside (b).
+    % 24-1-2022 => Implemented Settings.PeakFitSettings struct. Settings.PeakFitSettings are passed in 
+    % function with Settings.PeakFitSettings.a.MinPeakProminence, etc.
 
     % Important note: function works from outside to inside! That's why a
     % and b are so confusingly used here. Better would be to rewrite
@@ -24,19 +24,19 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     c(end-10:end) = nan;
     
     % check if splitting is possible if CutOff isset.
-    if Settings.CutOff && Settings.CutOffValue > length(c)
-        Logging(1, append('The CutOff value (', num2str(Settings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
-    elseif Settings.CutOff
-        Settings.CutOffValue = length(c) - Settings.CutOffValue;
+    if Settings.PeakFitSettings.CutOff && Settings.PeakFitSettings.CutOffValue > length(c)
+        Logging(1, append('The CutOff value (', num2str(Settings.PeakFitSettings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
+    elseif Settings.PeakFitSettings.CutOff
+        Settings.PeakFitSettings.CutOffValue = length(c) - Settings.PeakFitSettings.CutOffValue;
     end
     c_nor = (c-min(c))/(max(c)-min(c));
     
-    if Settings.CutOff
-        c_nor_a = smoothdata(c_nor(1:Settings.CutOffValue), 'gaussian', Settings.b.Smoothing);
-        c_nor_b = smoothdata(c_nor(Settings.CutOffValue+1:end), 'gaussian', Settings.a.Smoothing);
+    if Settings.PeakFitSettings.CutOff
+        c_nor_a = smoothdata(c_nor(1:Settings.PeakFitSettings.CutOffValue), 'gaussian', Settings.PeakFitSettings.b.Smoothing);
+        c_nor_b = smoothdata(c_nor(Settings.PeakFitSettings.CutOffValue+1:end), 'gaussian', Settings.PeakFitSettings.a.Smoothing);
         c_nor = [c_nor_a; c_nor_b];
     else
-        c_nor = smoothdata(c_nor, 'gaussian', Settings.a.Smoothing);
+        c_nor = smoothdata(c_nor, 'gaussian', Settings.PeakFitSettings.a.Smoothing);
     end
     
     
@@ -51,16 +51,16 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         % than x from points around), MinPeakProminence (drops at least x till next
         % peak)
 
-        if Settings.CutOff
+        if Settings.PeakFitSettings.CutOff
             
             %inside
             [pks_b, pks_locs_b] = findpeaks(c_nor_b, ...
-            'MinPeakProminence', Settings.a.MinPeakProminence, ...
-            'MinPeakDistance', Settings.a.MinPeakDistance ...
+            'MinPeakProminence', Settings.PeakFitSettings.a.MinPeakProminence, ...
+            'MinPeakDistance', Settings.PeakFitSettings.a.MinPeakDistance ...
             );
             [mns_b, mns_locs_b] = findpeaks(-c_nor_b, ...
-            'MinPeakProminence', Settings.a.MinPeakProminence, ...
-            'MinPeakDistance', Settings.a.MinPeakDistance ...
+            'MinPeakProminence', Settings.PeakFitSettings.a.MinPeakProminence, ...
+            'MinPeakDistance', Settings.PeakFitSettings.a.MinPeakDistance ...
             );
         
             % The first maxima or minima of part b (outside) is not taken
@@ -69,36 +69,36 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
             % extra data in part b: up to the first extrema in part a. We
             % then have to resmooth the data. Still not perfect, but it
             % finds the first extrema.
-            if Settings.CutOffIncludeMargin && ~isempty(pks_locs_b) && ~isempty(mns_locs_b)
+            if Settings.PeakFitSettings.CutOffIncludeMargin && ~isempty(pks_locs_b) && ~isempty(mns_locs_b)
                 first_peak = min([pks_locs_b(1); mns_locs_b(1)]) + length(c_nor_a);
-                c_nor_a = smoothdata(c_nor(1:first_peak), 'gaussian', Settings.b.Smoothing);
-                c_nor_b =  smoothdata(c_nor(first_peak+1:end), 'gaussian', Settings.a.Smoothing);
+                c_nor_a = smoothdata(c_nor(1:first_peak), 'gaussian', Settings.PeakFitSettings.b.Smoothing);
+                c_nor_b =  smoothdata(c_nor(first_peak+1:end), 'gaussian', Settings.PeakFitSettings.a.Smoothing);
                 c_nor = [c_nor_a; c_nor_b];
             end
             
             %outside
             [pks_a, pks_locs_a] = findpeaks(c_nor_a, ...
-            'MinPeakProminence', Settings.b.MinPeakProminence, ...
-            'MinPeakDistance', Settings.b.MinPeakDistance ...
+            'MinPeakProminence', Settings.PeakFitSettings.b.MinPeakProminence, ...
+            'MinPeakDistance', Settings.PeakFitSettings.b.MinPeakDistance ...
             );
             [mns_a, mns_locs_a] = findpeaks(-c_nor_a, ...
-            'MinPeakProminence', Settings.b.MinPeakProminence, ...
-            'MinPeakDistance', Settings.b.MinPeakDistance ...
+            'MinPeakProminence', Settings.PeakFitSettings.b.MinPeakProminence, ...
+            'MinPeakDistance', Settings.PeakFitSettings.b.MinPeakDistance ...
             );
         
             pks = [pks_a; pks_b];
-            pks_locs = [pks_locs_a; pks_locs_b+Settings.CutOffValue];
+            pks_locs = [pks_locs_a; pks_locs_b+Settings.PeakFitSettings.CutOffValue];
             mns = [mns_a; mns_b];
-            mns_locs = [mns_locs_a; mns_locs_b+Settings.CutOffValue];
+            mns_locs = [mns_locs_a; mns_locs_b+Settings.PeakFitSettings.CutOffValue];
         else
             [pks, pks_locs] = findpeaks(c_nor, ...
-                'MinPeakProminence', Settings.a.MinPeakProminence, ...
-                'MinPeakDistance', Settings.a.MinPeakDistance ...
+                'MinPeakProminence', Settings.PeakFitSettings.a.MinPeakProminence, ...
+                'MinPeakDistance', Settings.PeakFitSettings.a.MinPeakDistance ...
                 );
             
             [mns, mns_locs] = findpeaks(-c_nor, ...
-                'MinPeakProminence', Settings.a.MinPeakProminence, ...
-                'MinPeakDistance', Settings.a.MinPeakDistance ...
+                'MinPeakProminence', Settings.PeakFitSettings.a.MinPeakProminence, ...
+                'MinPeakDistance', Settings.PeakFitSettings.a.MinPeakDistance ...
                 );
         end
     end
@@ -133,6 +133,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 
 %% Fitting with model
 
+
     d_all = cell(1, length(pks_locs) + length(mns_locs) - 2);
 
     locs = [pks_locs; mns_locs];
@@ -151,16 +152,14 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         x1 = locs(i+1);
         x2 = locs(i);
     
-%         x = c(x1:x2);
         y = c_nor(x1:x2);
-%         x_nor = x-x(1);
-        y_nor = (y-min(y))/(max(y)-min(y));
+
+        y_nor = NormalizeData_SmartExtrema(y, Settings.Stitching_AveragePoints);
     
-        d = ModelFit(y_nor, lambda, HeightResolution);
+        d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
         d_all{i} = d(2:end);
     end
 
-    
 
     %% Fitting first and last section
     % This is tricky. In the ideal world the intensity of each maximum and
@@ -171,15 +170,15 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % This does not work for the first and last dataset (before first
     % extrema and after last extrema), since we have no idea what the
     % intensity of the actual maximum (out of frame) is going to be. Safest
-    % approach is to skip these sections (EstimateOutsides = false), an
-    % estimation can be made (EstimateOutsides = true) by assuming the
+    % approach is to skip these sections (Settings.EstimateOutsides = false), an
+    % estimation can be made (Settings.EstimateOutsides = true) by assuming the
     % extrema of this section is the average of the extrema that are
     % visible.
     % Note: it happens that the first or last datapoint is actual greater
     % than the average extrema. In that case we assume it to be a real
     % extrema and treat it like any other extrema.
 
-    if EstimateOutsides && length(extr) > 1
+    if Settings.EstimateOutsides && length(extr) > 1
 
         min_avg = -mean(mns);
         max_avg = mean(pks);
@@ -188,12 +187,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         x = 1:locs(end);
         y = c_nor(x);  % intensity
         %x_nor = x-x(1); % is already the case? copied from above. Check!
-        y_nor = (y-min(y))/(max(y)-min(y));
+        y_nor = NormalizeData_SmartExtrema(y, Settings.Stitching_AveragePoints);
         [y_start, y_end] = GetMedians(y, 10);
         
         if y(1) < y(end) % increasing dataset (to first max)
             if y_start < min_avg % start value is actual lower than avg. Assume it's a real min
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("START increasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of scaling
@@ -201,13 +200,13 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % between the estimated actual min (min_avg) and our min
                 % (abs(min(y)-min_avg)).
                 b = abs(min(y)-min_avg);
-                y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b)+b;
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                y_nor = y_nor*(1-b)+b;
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("START increasing, estimated minimum")
             end
         else % decrease
             if y_end > max_avg % end value is actual higher than avg. Assume it's a real max
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("START decreasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
@@ -215,11 +214,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % difference between the estimated actual max (max_avg) and
                 % our max (abs(max(y)-max_avg)).
                 b = abs(max(y)-max_avg); % NOT TESTED ... No dataset ...
-                y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b);
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                y_nor = y_nor*(1-b);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("START decreasing, estimated maximum")
             end
         end
+        d = flip(-d+max(d));
         d_all = [d_all, {d}];
         clear x y x_nor y_nor d b
     
@@ -227,12 +227,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         x = 1:(length(c)-locs(1));
         y = c_nor(x);
         %x_nor = x-x(1); % is already the case? copied from above. Check!
-        y_nor = (y-min(y))/(max(y)-min(y));
+        y_nor = NormalizeData_SmartExtrema(y, Settings.Stitching_AveragePoints);
         [~, y_end] = GetMedians(y, 10);
 
         if y(1) < y(end) % increasing dataset (to end)
             if y_end > max_avg % last value is actual larger than avg. Assume it's a real max
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("END start increasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
@@ -240,13 +240,13 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % difference between the estimated actual max (max_avg) and
                 % our max (abs(max(y)-max_avg)).
                 b = abs(max(y)-max_avg); 
-                y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b);
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                y_nor = y_nor*(1-b);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("END start increasing, estimated maximum")
             end
         else % decrease
             if y_end < min_avg % last value is actual lower than avg. Assume it's a real min
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("END start decreasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of
@@ -254,11 +254,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % difference between the estimated actual min (min_avg) and
                 % our max (abs(min(y)-min_avg)).
                 b = abs(min(y)-min_avg);
-                y_nor = ((y_nor-min(y_nor))/(max(y_nor)-min(y_nor)))*(1-b)+b;
-                d = ModelFit(y_nor, lambda, HeightResolution);
+                y_nor = y_nor*(1-b)+b;
+                d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
 %                 disp("END start decreasing, estimated minimum")
             end 
         end
+        d = flip(-d+max(d));
         d_all = [{d}, d_all];
         clear x y x_nor y_nor d b y_start y_end
 
@@ -272,16 +273,29 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 
     end
 
+   
     
     %% Stitching data together.
     
     %updated: 3-2-2022
-    lastvalues = cumsum(cellfun(@(x) x(find(~isnan(x), 1, 'last')), d_all)); %exlude nans
+%     d_all = flip(d_all);
+    lastvalues = cumsum(cellfun(@(x) median(x(find(~isnan(x), 1, 'last'))), d_all), 'omitnan'); %exlude nans
     for i=2:length(d_all)
         d_all{i} = d_all{i} + lastvalues(i-1);
     end
     d_final = cell2mat(d_all);
+    
 
+    % TEMP TEMP PLOTTING
+    figure
+    hold on
+    for j = 1:length(d_all)
+        subplot(1,length(d_all),j)
+        plot(d_all{j})
+    end
+
+    
+    
     
     %% Flipping data
     % We want distance=0 to be center of the image. TODO test if it works
