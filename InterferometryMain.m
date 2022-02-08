@@ -85,8 +85,10 @@ now
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
 % Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_176.tiff';
-Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
-% Settings.Source = 'E:\20220201\';
+% Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_20.tiff';
+% Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
+% Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_5.tiff';
+Settings.Source = 'E:\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
@@ -98,7 +100,7 @@ Settings.MinPeakDistance_inside = 18;            % Peak fitting MinPeakDistance 
 Settings.MinPeakProminence_inside = .10;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
     Settings.Smoothing_outside = 0.1;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.3;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.25;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;
 Settings.IgnoreInside = false;
 Settings.Analyze_TwoParts_CutOff = 1350;
@@ -155,10 +157,10 @@ Settings.Display.HeightProfileProgress = false;       % Show progress of Height 
 Settings.Display.LogoAtStart = true;
     
 % Plotting
-Settings.Plot_VisualizeSlices = false;
+Settings.Plot_VisualizeSlices = true;
 Settings.Plot_SingleSlice = true;
 Settings.Plot_Surface = false; % not working properly
-Settings.Plot_Contour = false;
+Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging == 2
     Settings.Plot_Contour_OverlayOnImage = true;
     Settings.Plot_Contour_Levels = 10;
     Settings.Plot_Contour_Transparency = 0.6;
@@ -167,12 +169,12 @@ Settings.Plot_AverageHeightAllImages = true;
 Settings.PlotFontSize = 15;
 
 % Saving
-Settings.Save_Figures = false;
+Settings.Save_Figures = true;
     Settings.Save_PNG = true;
     Settings.Save_TIFF = true;
     Settings.Save_FIG = true;
     Settings.Save_Folder = 'results';
-Settings.Save_Data = false;
+Settings.Save_Data = true;
 
 % Peak fitting settings
 Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on

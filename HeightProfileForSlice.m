@@ -183,7 +183,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         min_avg = -mean(mns);
         max_avg = mean(pks);
     
-        % fit from start to first extrema
+        % fit from START to first extrema
         x = 1:locs(end);
         y = c_nor(x);  % intensity
         %x_nor = x-x(1); % is already the case? copied from above. Check!
@@ -193,7 +193,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         if y(1) < y(end) % increasing dataset (to first max)
             if y_start < min_avg % start value is actual lower than avg. Assume it's a real min
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("START increasing, actual minimum")
+                 Logging(6, "START increasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of scaling
                 % from 0-1 we need to scale from b to 1, where b is the difference
@@ -202,12 +202,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 b = abs(min(y)-min_avg);
                 y_nor = y_nor*(1-b)+b;
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("START increasing, estimated minimum")
+                 Logging(6, "START increasing, estimated minimum")
             end
         else % decrease
             if y_end > max_avg % end value is actual higher than avg. Assume it's a real max
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("START decreasing, actual maximum")
+                 Logging(6, "START decreasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
                 % scaling from 0-1 we scale from 0 to 1-b, where be is the
@@ -216,14 +216,14 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 b = abs(max(y)-max_avg); % NOT TESTED ... No dataset ...
                 y_nor = y_nor*(1-b);
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("START decreasing, estimated maximum")
+                Logging(6, "START decreasing, estimated maximum")
             end
         end
-        d = flip(-d+max(d));
+%         d = flip(-d+max(d));
         d_all = [d_all, {d}];
         clear x y x_nor y_nor d b
     
-        % fit last extrema to end
+        % fit last extrema to END
         x = 1:(length(c)-locs(1));
         y = c_nor(x);
         %x_nor = x-x(1); % is already the case? copied from above. Check!
@@ -233,7 +233,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         if y(1) < y(end) % increasing dataset (to end)
             if y_end > max_avg % last value is actual larger than avg. Assume it's a real max
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("END start increasing, actual maximum")
+                 Logging(6, "END start increasing, actual maximum")
             else
                 % the actual max is not in our data. thus instead of
                 % scaling from 0-1 we scale from 0 to 1-b, where be is the
@@ -242,12 +242,12 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 b = abs(max(y)-max_avg); 
                 y_nor = y_nor*(1-b);
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("END start increasing, estimated maximum")
+                 Logging(6, "END start increasing, estimated maximum")
             end
         else % decrease
             if y_end < min_avg % last value is actual lower than avg. Assume it's a real min
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("END start decreasing, actual minimum")
+                 Logging(6, "END start decreasing, actual minimum")
             else
                 % the actual min is not in our data. thus instead of
                 % scaling from 0-1 we scale from b to 1, where be is the
@@ -256,10 +256,11 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 b = abs(min(y)-min_avg);
                 y_nor = y_nor*(1-b)+b;
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
-%                 disp("END start decreasing, estimated minimum")
+                 Logging(6, "END start decreasing, estimated minimum")
             end 
         end
         d = flip(-d+max(d));
+%         d = flip(d);
         d_all = [{d}, d_all];
         clear x y x_nor y_nor d b y_start y_end
 
@@ -278,24 +279,11 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     %% Stitching data together.
     
     %updated: 3-2-2022
-%     d_all = flip(d_all);
     lastvalues = cumsum(cellfun(@(x) median(x(find(~isnan(x), 1, 'last'))), d_all), 'omitnan'); %exlude nans
     for i=2:length(d_all)
         d_all{i} = d_all{i} + lastvalues(i-1);
     end
     d_final = cell2mat(d_all);
-    
-
-    % TEMP TEMP PLOTTING
-    figure
-    hold on
-    for j = 1:length(d_all)
-        subplot(1,length(d_all),j)
-        plot(d_all{j})
-    end
-
-    
-    
     
     %% Flipping data
     % We want distance=0 to be center of the image. TODO test if it works

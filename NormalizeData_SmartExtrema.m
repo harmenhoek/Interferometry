@@ -1,5 +1,5 @@
 function y_normalized = NormalizeData_SmartExtrema(y, averagepoints)
-    if averagepoints > 1
+    if averagepoints > 1 && length(y) > averagepoints
         y_sorted = sort(y); %SLOW
         y_min = median(y_sorted(1:averagepoints),'omitnan');
         y_max = median(y_sorted(find(~isnan(y_sorted), averagepoints, 'last'))); %exlude nans
