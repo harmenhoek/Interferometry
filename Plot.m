@@ -172,9 +172,22 @@ classdef Plot
                 end
                 hold on
                 map = parula(length(FigData.HeightProfile_Mean_AllImages));
+                
+                if Settings.Plot_AverageHeightAllImages_EquivPoint < 1  % we want EquivPoint to be an Setting, so use negative to work backwards. STUPID MATLAB works with 'end' to indicate last value, so extra code here ...
+                    equiv_value = max(cellfun(@(x) x(end+Settings.Plot_AverageHeightAllImages_EquivPoint), FigData.HeightProfile_Mean_AllImages));
+                else
+                    equiv_value = max(cellfun(@(x) x(Settings.Plot_AverageHeightAllImages_EquivPoint), FigData.HeightProfile_Mean_AllImages)); % the value of y(100) for every slice. to align all data
+                end
+                
                 for i = 1:length(FigData.HeightProfile_Mean_AllImages)
+                    y = FigData.HeightProfile_Mean_AllImages{i};
+                    if Settings.Plot_AverageHeightAllImages_EquivPoint < 1
+                        y = y + equiv_value - y(end+Settings.Plot_AverageHeightAllImages_EquivPoint);
+                    else
+                        y = y + equiv_value - y(Settings.Plot_AverageHeightAllImages_EquivPoint);
+                    end
                     datapoints = length(FigData.HeightProfile_Mean_AllImages{i});
-                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, FigData.HeightProfile_Mean_AllImages{i} * 10e6, 'LineWidth', 2, 'Color', map(i,:))
+                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 10e6, 'LineWidth', 2, 'Color', map(i,:))
                 end
 %                 legend(append('t=', compose('%g', Settings.TimeRange), 's'))
                 xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
@@ -255,7 +268,7 @@ classdef Plot
                 t.Padding = 'compact';
                 
                 [~, filename, ~] = fileparts(FigData.Image);
-                title(t, filename)
+                title(t, filename, 'Interpreter', 'none')
                 
                 
                 

@@ -85,6 +85,7 @@ now
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
 Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
+Settings.Source = 'data\20220201';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_20.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_5.tiff';
@@ -166,6 +167,7 @@ Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging =
     Settings.Plot_Contour_Transparency = 0.6;
 Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
 Settings.Plot_AverageHeightAllImages = true;
+    Settings.Plot_AverageHeightAllImages_EquivPoint = 1;  %This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
 Settings.Plot_ResultPlot = true;
 
 Settings.PlotFontSize = 15;
@@ -394,6 +396,7 @@ elseif isfield(Settings, 'ZeisLensMagnification')
     end    
 end
 
+
 clear ext steps maxres minres status msg path name extensions savefolder_sub images_fullpath images
 Logging(6, 'Settings checked and all valid.')
 
@@ -461,10 +464,12 @@ Logging(5, '---- Height Profile calculations started.')
 
 HeightProfiles_ForSlices_AllImages = cell(1, length(Settings.Analysis_ImageList));
 HeightProfile_Mean_AllImages = cell(1, length(Settings.Analysis_ImageList));
-TimePerImage = nan(1, length(Settings.Analysis_ImageList));
+
+TimeRemaining = TimeTracker;
+TimeRemaining = Initiate(TimeRemaining,  length(Settings.Analysis_ImageList), 1.8);
 
 for i = 1:Settings.ImageCount
-    tStart = tic;
+    TimeRemaining = StartIteration(TimeRemaining);
     Image = Settings.Analysis_ImageList{i};
     
 %     if mod(num2str(i), round(Settings.ImageCount/10)) == 0
@@ -561,7 +566,8 @@ for i = 1:Settings.ImageCount
 
         Settings.Plot_ResultPlot = true;
         f9 = Plot.ResultPlot(Settings, struct('Image',Image, 'theta_all',theta_all, 'points',points, 'I',I, 'c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
-
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_ResultPlot]), f9, save_extensions, append(basename, '_FinalSlice', num2str(k), '_', num2str(i)));
+        if ~Settings.Display.IndividualPlots; close(f9); end % must close, even if not visible, otherwise in memory
             
         % Plot one slice
         f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
@@ -657,15 +663,8 @@ for i = 1:Settings.ImageCount
     
     clear f5 f6 f7 f8 data data_all
     
-    TimePerImage(i) = toc(tStart);
-    if Settings.ImageCount > 1
-        TimeRemaining = (Settings.ImageCount-i)*mean(TimePerImage, 'omitnan') + 1.6;  % 1.6 for rest of code.
-        if TimeRemaining < 90 && TimeRemaining > 1
-            Logging(5, append('Estimated time remaining: ', num2str(round(TimeRemaining)), ' seconds.'))
-        else
-            Logging(5, append('Estimated time remaining: ', num2str(round(TimeRemaining/60)), ' minutes.'))
-        end
-    end
+    [TimeRemaining, TimeLeft] = EndIteration(TimeRemaining);
+    Logging(5, TimeLeft)
 end % iterate over all images
 
 clear i tStart TimeRemaining
