@@ -197,6 +197,73 @@ classdef Plot
             end
         end % f = AverageHeight_AllImages
         
+        function f = ResultPlot(Settings, FigData)
+            if Settings.Plot_ResultPlot && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
+                    f = figure('visible', 'on');
+                else
+                    f = figure('visible', 'off');
+                end
+                f.Position = [10 10 800 600];
+                
+                clrs = [0 0.4470 0.7410; 0.6350 0.0780 0.1840; .9763 .9831 .0538; 0.8500 0.3250 0.0980; 0.9290 0.6940 0.125];
+                
+                t = tiledlayout(5,3);
+                
+                nexttile([3 3]);
+                imshow(FigData.I)
+                hold on
+                for k = 1:length(FigData.theta_all)
+                    pnt = FigData.points(k, :);
+                    roi = [pnt; Settings.Interferometry_Center];
+                    plot(roi(:,1), roi(:,2), 'Color', [0.9290 0.6940 0.125 0.2], 'LineWidth', 1)
+                    clear pnt roi
+                end
+                
+                offset_x = 50;
+                rectangle('Position',[offset_x-20, 100-40, offset_x+Settings.ConversionFactorPixToMm, 300], 'FaceColor', 'white', 'Curvature', 0, 'LineStyle', 'none')
+                plot([offset_x offset_x+Settings.ConversionFactorPixToMm], [100 100], '-', 'Color', 'red', 'LineWidth', 3)
+                text(round(offset_x+Settings.ConversionFactorPixToMm/2), 120, '1 mm', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Color', 'red')
+          
+                c_l = 1:length(FigData.c_or);
+                x = c_l ./ Settings.ConversionFactorPixToMm;
+                
+                nexttile([2 3]);
+                colororder([clrs(2,:);clrs(1,:)])
+                yyaxis left
+                c_or_nor = (FigData.c_or-min(FigData.c_or))/(max(FigData.c_or)-min(FigData.c_or));
+                plot(x, c_or_nor , '-', 'Color', clrs(5,:), 'LineWidth', 2)
+                hold on
+                plot(x, FigData.c_nor,  '-', 'Color', clrs(2,:), 'LineWidth', 2)
+                plot(x(FigData.pks_locs), FigData.pks, '.', 'MarkerSize', 25, 'Color', clrs(2,:))
+                plot(x(FigData.mns_locs), -FigData.mns, '.', 'MarkerSize', 25, 'Color', clrs(2,:))
+                xlabel('Distance from center [pix]')
+                ylabel('Intensity [arb. units]')
+                ylim([-0.05 1.05])
+
+                yyaxis right
+                plot(x, FigData.d_final.*1e6, '.-', 'Color', clrs(1,:), 'LineWidth', 3)
+                xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
+                ylabel('Height [um]')
+                ylim([0 1.01*max(FigData.d_final.*1e6)])
+                xlim([0, max(x)])
+                l = legend({'Average slice', 'Filtered slice', '', '', 'Height profile'}, 'Location', 'best');
+                l.Units = 'normalized';
+                l.Position = [0.7402 0.1267 0.1704 0.0983];
+                
+                t.TileSpacing = 'compact';
+                t.Padding = 'compact';
+                
+                [~, filename, ~] = fileparts(FigData.Image);
+                title(t, filename)
+                
+                
+                
+            else
+                f = [];
+            end
+        end % f = AverageHeight
+        
         
 %         function f = AverageHeight(Settings, FigData)
 %             if Settings.Plot_AverageHeight && (Settings.Save_Figures || Settings.Display.IndividualPlots)

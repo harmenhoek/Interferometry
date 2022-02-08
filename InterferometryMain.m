@@ -84,21 +84,21 @@ now
 % Settings.IgnoreInside = true;
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
-% Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_176.tiff';
+Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_20.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_5.tiff';
-Settings.Source = 'E:\20220201\';
+% Settings.Source = 'E:\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
 Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
 Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
 Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 0.1;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.Smoothing_inside = 50;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
 Settings.MinPeakDistance_inside = 18;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
 Settings.MinPeakProminence_inside = .10;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 0.1;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
     Settings.MinPeakProminence_outside = 0.25;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;
@@ -129,7 +129,7 @@ Settings.RefractiveIndex_Medium = 1.4329;
 
 Settings.Anlysismode_averaging = 2; % 1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 
-Settings.Stitching_AveragePoints = 5;
+Settings.Stitching_AveragePoints = 1;
 
 Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
 
@@ -157,8 +157,8 @@ Settings.Display.HeightProfileProgress = false;       % Show progress of Height 
 Settings.Display.LogoAtStart = true;
     
 % Plotting
-Settings.Plot_VisualizeSlices = true;
-Settings.Plot_SingleSlice = true;
+Settings.Plot_VisualizeSlices = false;
+Settings.Plot_SingleSlice = false;
 Settings.Plot_Surface = false; % not working properly
 Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging == 2
     Settings.Plot_Contour_OverlayOnImage = true;
@@ -166,15 +166,17 @@ Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging =
     Settings.Plot_Contour_Transparency = 0.6;
 Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
 Settings.Plot_AverageHeightAllImages = true;
+Settings.Plot_ResultPlot = true;
+
 Settings.PlotFontSize = 15;
 
 % Saving
-Settings.Save_Figures = true;
+Settings.Save_Figures = false;
     Settings.Save_PNG = true;
     Settings.Save_TIFF = true;
     Settings.Save_FIG = true;
     Settings.Save_Folder = 'results';
-Settings.Save_Data = true;
+Settings.Save_Data = false;
 
 % Peak fitting settings
 Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on
@@ -511,7 +513,7 @@ for i = 1:Settings.ImageCount
                 HeightProfiles_ForSlices{k} = [xx', yy', d_final'];
                 first_empty_row = first_empty_row + length(xx);
             end
-    
+            
     
             % Plot one slice
             if k == Settings.PlotSingleSlice
@@ -557,6 +559,10 @@ for i = 1:Settings.ImageCount
             first_empty_row = first_empty_row + length(xx);
         end
 
+        Settings.Plot_ResultPlot = true;
+        f9 = Plot.ResultPlot(Settings, struct('Image',Image, 'theta_all',theta_all, 'points',points, 'I',I, 'c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
+
+            
         % Plot one slice
         f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
         SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
