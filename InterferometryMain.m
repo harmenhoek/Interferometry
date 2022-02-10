@@ -1,4 +1,4 @@
-clc; clear all; Settings = struct(); Settings.LensPresets = struct();
+clc; clear all; Settings = struct(); Settings.LensPresets = struct(); addpath('functions')
 
 %% ABOUT
 
@@ -31,6 +31,8 @@ be.
 - Plotting fails for Settings.Analyze_TwoParts_CutOff
 now
 - function AverageHeight, fix distance from center.
+- FinalSlice and other slices in seperate folders if images > 10
+- Update PROC name to more readable one.
 
 %} 
 
@@ -84,24 +86,24 @@ now
 % Settings.IgnoreInside = true;
 % Settings.Analyze_TwoParts_CutOff = 1618;
 
-Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_47.tiff';
-Settings.Source = 'data\20220201';
+% Settings.Source = 'data\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_75.tiff';
+% Settings.Source = 'data\20220201';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_20.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
-% Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_5.tiff';
-% Settings.Source = 'E:\20220201\';
+% Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_130.tiff';
+Settings.Source = 'E:\20220201\';
 Settings.TimeInterval = 30;
 Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
 Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
 Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
 Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 50;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 18;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = .10;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.MinPeakDistance_inside = 17;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
     Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.25;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.18;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;
 Settings.IgnoreInside = false;
 Settings.Analyze_TwoParts_CutOff = 1350;
@@ -153,13 +155,13 @@ Settings.Display.IndividualPlots = true;  % only determines showing them to scre
 Settings.Display.TotalPlots = true;
 Settings.Display.ImageProgress = true;
     Settings.Display.ImageProgressValue = 1;
-Settings.Display.HeightProfileProgress = false;       % Show progress of Height Profile calculation of all slices.
+Settings.Display.HeightProfileProgress = false;       % Show progress of Height Profile calculation of all slices. Only visible if LogLevel is 6.
     Settings.Display.HeightProfileProgressValue = 10;
 Settings.Display.LogoAtStart = true;
     
 % Plotting
-Settings.Plot_VisualizeSlices = false;
-Settings.Plot_SingleSlice = false;
+Settings.Plot_VisualizeSlices = true;
+Settings.Plot_SingleSlice = true;
 Settings.Plot_Surface = false; % not working properly
 Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging == 2
     Settings.Plot_Contour_OverlayOnImage = true;
@@ -167,21 +169,21 @@ Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging =
     Settings.Plot_Contour_Transparency = 0.6;
 Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
 Settings.Plot_AverageHeightAllImages = true;
-    Settings.Plot_AverageHeightAllImages_EquivPoint = 1;  %This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
+    Settings.Plot_AverageHeightAllImages_EquivPoint = -10;  %This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
 Settings.Plot_ResultPlot = true;
 
 Settings.PlotFontSize = 15;
 
 % Saving
-Settings.Save_Figures = false;
+Settings.Save_Figures = true;
     Settings.Save_PNG = true;
-    Settings.Save_TIFF = true;
-    Settings.Save_FIG = true;
-    Settings.Save_Folder = 'results';
-Settings.Save_Data = false;
+    Settings.Save_TIFF = false;
+    Settings.Save_FIG = false;
+    Settings.Save_Folder = 'E:\results';
+Settings.Save_Data = true;
 
 % Peak fitting settings
-Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on
+Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
 
 % Conversion pix to SI
 Settings.LensPresets.x2 = 677;  % Standard presets to use as conversion, assuming in focus. Add like .xMagnification = PixToMm.
@@ -345,6 +347,7 @@ if Settings.Save_Figures || Settings.Save_Data
     stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
     savefolder_sub = append(Settings.Save_Folder, '\', stamp);
     [status, msg] = mkdir(savefolder_sub);
+
     if status == 0
         Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub, '\', '\\'), '" failed! Error: ', msg))
     else
@@ -364,11 +367,14 @@ if Settings.Save_Figures
         extensions = {'png', 'tiff', 'fig'};
         save_extensions = extensions([Settings.Save_PNG, Settings.Save_TIFF, Settings.Save_FIG]);
     end
+else
+    Logging(3, 'Figures will not be saved!')
 end
 
 % TODO:  Check if all images are same size
 
 % Determine if to plot individual plots or not
+    %TODO include timer. If no choice is made in 60s, start without showing plots.
 if Settings.Display.IndividualPlots && length(Settings.Analysis_ImageList) > 2
     Logging(2, 'There are more than 2 images in the selected folder, and Show_Plots is on. This can significantly slow down your computer. Do you wish to continue, or turn off Show_Plots?')
     x = input('Y (keep on) / N (turn off) [N]  ','s');
@@ -395,6 +401,11 @@ elseif isfield(Settings, 'ZeisLensMagnification')
         Logging(1, append('Lens preset ', Settings.ZeisLensMagnification, ' does not exist. Valid options are: ', strjoin(fields(Settings.LensPresets), ', '), '. Or add as new to Settings.LensPresets.'))
     end    
 end
+
+if ~Settings.Save_Data
+    Logging(3, 'Data will not be saved!')
+end
+    
 
 
 clear ext steps maxres minres status msg path name extensions savefolder_sub images_fullpath images
@@ -664,7 +675,9 @@ for i = 1:Settings.ImageCount
     clear f5 f6 f7 f8 data data_all
     
     [TimeRemaining, TimeLeft] = EndIteration(TimeRemaining);
-    Logging(5, TimeLeft)
+    if TimeLeft
+        Logging(5, TimeLeft)
+    end
 end % iterate over all images
 
 clear i tStart TimeRemaining

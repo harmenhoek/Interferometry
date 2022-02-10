@@ -32,6 +32,8 @@ classdef TimeTracker
                 else
                     remaining = 'Done any second now ...';
                 end
+            else
+                remaining = [];
             end
         end
     end

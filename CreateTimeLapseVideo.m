@@ -1,13 +1,17 @@
+addpath('functions')
+
 Settings = struct();
 
 Settings.ImageSkip = 1;
-Settings.FrameRate = 1;
-Settings.Resize = 0.25;
+Settings.FrameRate = 10;
+Settings.Resize = 1;
 Settings.Save_Folder = 'results';
 
 Settings.Time.Interval = 30;
 Settings.Time.ShowTime = true;
-Settings.Time.FontSize = 50;
+Settings.Time.FontSize = 40;
+Settings.Time.Round = 0;
+Settings.Time.Unit = 'min'; %supported: variable, min, sec, hrs, auto
 
 global LogLevel
 LogLevel = 5;
@@ -15,7 +19,6 @@ LogLevel = 5;
 %% Start
 
 clc
-tic
 Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 
 
@@ -26,6 +29,7 @@ Settings.Source = uigetdir;
 
 %% Load Files
 
+tic
 Settings.Source_ImageList = {};
 for ext = {'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'} %check for images of this type in source folder and append to imagelist if they exist.
     images = dir(append(Settings.Source, '\*', ext{1}));
@@ -66,13 +70,33 @@ for ii = 1:length(Settings.Analysis_ImageList)
     img = imresize(img, Settings.Resize);
     if Settings.Time.ShowTime
         t = ((ii-1) * Settings.Time.Interval) * Settings.ImageSkip;
-        if t < 60
+        if strcmpi(Settings.Time.Unit, 'variable')           
+            if t < 60
+                StrTime = append(num2str(t), ' s');
+            elseif t < 3600
+                StrTime = append(num2str(round(t/60,Settings.Time.Round)), ' min');
+            else
+                StrTime = append(num2str(round(t/3600,Settings.Time.Round)), ' hours');
+            end
+        elseif strcmpi(Settings.Time.Unit, 'sec')
             StrTime = append(num2str(t), ' s');
-        elseif t < 3600
-            StrTime = append(num2str(round(t/60,1)), ' min');
+        elseif strcmpi(Settings.Time.Unit, 'min')
+            StrTime = append(num2str(round(t/60,Settings.Time.Round)), ' min');
+        elseif strcmpi(Settings.Time.Unit, 'hrs')
+            StrTime = append(num2str(round(t/3600,Settings.Time.Round)), ' hours');
+        elseif strcmpi(Settings.Time.Unit, 'auto')
+            totaltime = length(Settings.Analysis_ImageList) * Settings.Time.Interval;
+            if totaltime < 60
+                StrTime = append(num2str(t), ' s');
+            elseif totaltime < 3600
+                StrTime = append(num2str(round(t/60,Settings.Time.Round)), ' min');
+            else
+                StrTime = append(num2str(round(t/3600,Settings.Time.Round)), ' hours');
+            end
         else
-            StrTime = append(num2str(round(t/3600,1)), ' hours');
+            Logging(1, append('No valid Settings.Time.Unit = "', num2str(Settings.Time.Unit), '". Choose variable, sec, min, hrs, auto.'))
         end
+
         img = insertText(img, [10 10], ...
             append('t = ', StrTime), ...
             'FontSize', Settings.Time.FontSize, ...
