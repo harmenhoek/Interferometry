@@ -1,16 +1,30 @@
 Settings = struct();
 
 Settings.ImageSkip = 1;
-Settings.FrameRate = 24;
-Settings.Resize = 0.5;
+Settings.FrameRate = 1;
+Settings.Resize = 0.25;
 Settings.Save_Folder = 'results';
+
+Settings.Time.Interval = 30;
+Settings.Time.ShowTime = true;
+Settings.Time.FontSize = 50;
 
 global LogLevel
 LogLevel = 5;
-    
+
+%% Start
+
+clc
+tic
+Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
+
+
+%% User Input
 
 Logging(2, 'Select the folder with images for video.')
 Settings.Source = uigetdir;
+
+%% Load Files
 
 Settings.Source_ImageList = {};
 for ext = {'.tif', '.tiff', '.png', '.jpg', '.jpeg', '.bmp', '.gif'} %check for images of this type in source folder and append to imagelist if they exist.
@@ -28,7 +42,9 @@ else
     Logging(5, append(num2str(length(Settings.Source_ImageList)), ' images found in Source folder, ', num2str(length(1:Settings.ImageSkip:length(Settings.Source_ImageList))), ' will be merged to a video (every ', num2str(Settings.ImageSkip), ' image(s)).'))
 end
 
-%% Filename
+%% Generate filename
+
+% TODO link to original file, and save in more reasonable folder.
 
 [~, name, ~] = fileparts(Settings.Source_ImageList{1});
 stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
@@ -48,10 +64,36 @@ for ii = 1:length(Settings.Analysis_ImageList)
     
 	img = imread(Settings.Analysis_ImageList{ii});
     img = imresize(img, Settings.Resize);
-	writeVideo(outputVideo, img)
+    if Settings.Time.ShowTime
+        t = ((ii-1) * Settings.Time.Interval) * Settings.ImageSkip;
+        if t < 60
+            StrTime = append(num2str(t), ' s');
+        elseif t < 3600
+            StrTime = append(num2str(round(t/60,1)), ' min');
+        else
+            StrTime = append(num2str(round(t/3600,1)), ' hours');
+        end
+        img = insertText(img, [10 10], ...
+            append('t = ', StrTime), ...
+            'FontSize', Settings.Time.FontSize, ...
+            'BoxColor', 'white', ...
+            'BoxOpacity', 0.4, ...
+            'TextColor', 'black');
+        writeVideo(outputVideo, img)
+    end
     
     [TimeRemaining, TimeLeft] = EndIteration(TimeRemaining);
     Logging(5, TimeLeft)
 end
 close(outputVideo)
+
+
+%% Finish
+
+
+
+elapsedtime = toc;
+Logging(5, append('Code finished successfully in ', num2str(round(elapsedtime)), ' seconds.'))
+
+clear elapsedtime
 
