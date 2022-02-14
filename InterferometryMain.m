@@ -92,8 +92,8 @@ now
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_130.tiff';
 Settings.Source = 'E:\20220201\';
-Settings.TimeInterval = 30;
-Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
+Settings.TimeInterval = 10;
+Settings.LensMagnification = 'NikonX4'; % if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [4485.5 729.5];
 Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
 Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
@@ -107,6 +107,26 @@ Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fittin
 Settings.ImageProcessing.EnhanceContrast = false;
 Settings.IgnoreInside = false;
 Settings.Analyze_TwoParts_CutOff = 1350;
+
+
+Settings.Source = 'E:\20220210_nikon\open air green filter-4x';
+Settings.TimeInterval = 10;
+Settings.LensMagnification = 'ZeisX2'; % if not set, pixels will be use as unit.
+Settings.Interferometry_Center = [4485.5 729.5];
+Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
+Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
+Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+Settings.MinPeakDistance_inside = 17;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.18;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+Settings.ImageProcessing.EnhanceContrast = false;
+Settings.IgnoreInside = false;
+Settings.Analyze_TwoParts_CutOff = 1350;
+
+
 
 % TODO: settings wizard for analysis settings! Choose prominance etc
 % TODO: make MinPeakProminance settings to orginal image!
@@ -186,9 +206,12 @@ Settings.Save_Data = true;
 Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
 
 % Conversion pix to SI
-Settings.LensPresets.x2 = 677;  % Standard presets to use as conversion, assuming in focus. Add like .xMagnification = PixToMm.
-Settings.LensPresets.x5 = 1837;
-Settings.LensPresets.x10 = 3679;
+Settings.LensPresets.ZeisX2 = 677;  % Standard presets to use as conversion, assuming in focus. Add like .xMagnification = PixToMm.
+Settings.LensPresets.ZeisX5 = 1837;
+Settings.LensPresets.ZeisX10 = 3679;
+Settings.LensPresets.NikonX2 = 1355;
+Settings.LensPresets.NikonX4 = 2700;
+
 
 global LogLevel
 LogLevel = 5;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
@@ -391,14 +414,14 @@ end
 
 % Determine conversion factor and unit for distance scale
 Settings.DistanceUnit = 'mm'; % the standard  (µm)
-if ~isfield(Settings, 'ZeisLensMagnification') && ~isfield(Settings, 'ConversionFactorPixToMm')
+if ~isfield(Settings, 'LensMagnification') && ~isfield(Settings, 'ConversionFactorPixToMm')
     Settings.ConversionFactorPixToMm = 1;
     Settings.DistanceUnit = 'pix';
-elseif isfield(Settings, 'ZeisLensMagnification')
-    if isfield(Settings.LensPresets, Settings.ZeisLensMagnification)
-        Settings.ConversionFactorPixToMm = getfield(Settings.LensPresets, Settings.ZeisLensMagnification);
+elseif isfield(Settings, 'LensMagnification')
+    if isfield(Settings.LensPresets, Settings.LensMagnification)
+        Settings.ConversionFactorPixToMm = getfield(Settings.LensPresets, Settings.LensMagnification);
     else
-        Logging(1, append('Lens preset ', Settings.ZeisLensMagnification, ' does not exist. Valid options are: ', strjoin(fields(Settings.LensPresets), ', '), '. Or add as new to Settings.LensPresets.'))
+        Logging(1, append('Lens preset ', Settings.LensMagnification, ' does not exist. Valid options are: ', strjoin(fields(Settings.LensPresets), ', '), '. Or add as new to Settings.LensPresets.'))
     end    
 end
 
