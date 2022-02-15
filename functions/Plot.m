@@ -155,7 +155,7 @@ classdef Plot
                 else
                     f = figure('visible', 'off');
                 end
-                plot((1:length(FigData.HeightProfile_Mean)) ./ Settings.ConversionFactorPixToMm, FigData.HeightProfile_Mean * 10e6, 'LineWidth', 3)
+                plot((1:length(FigData.HeightProfile_Mean)) ./ Settings.ConversionFactorPixToMm, FigData.HeightProfile_Mean * 1e6, 'LineWidth', 3)
                 xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
                 ylabel('Height [µm]')
             else
@@ -187,7 +187,7 @@ classdef Plot
                         y = y + equiv_value - y(Settings.Plot_AverageHeightAllImages_EquivPoint);
                     end
                     datapoints = length(FigData.HeightProfile_Mean_AllImages{i});
-                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 10e6, 'LineWidth', 2, 'Color', map(i,:))
+                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 1e6, 'LineWidth', 2, 'Color', map(i,:))
                 end
 %                 legend(append('t=', compose('%g', Settings.TimeRange), 's'))
                 xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
@@ -204,7 +204,7 @@ classdef Plot
                     ylabel(c, 'Time [s]', 'FontSize', Settings.PlotFontSize)
                 end
                 xlim([0, max(cellfun(@(x) length(x), FigData.HeightProfile_Mean_AllImages)) / Settings.ConversionFactorPixToMm])
-                ylim([0, max(cellfun(@(x) max(x), FigData.HeightProfile_Mean_AllImages))* 10e6]) %cell2mat needed if HeightProfile_Mean_AllImages contains empty cells
+                ylim([0, max(cellfun(@(x) max(x), FigData.HeightProfile_Mean_AllImages))* 1e6]) %cell2mat needed if HeightProfile_Mean_AllImages contains empty cells
             else
                 f = [];
             end

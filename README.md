@@ -1,3 +1,5 @@
+Note: documentation last updated on January 3.
+
 # Sɪɴɢʟᴇ Wᴀᴠᴇʟᴇɴɢᴛʜ Rᴇғʟᴇᴄᴛɪᴏɴ Iɴᴛᴇʀғᴇʀᴏᴍᴇᴛʀʏ Aɴᴀʟʏsɪs
  MATLAB program for analyzing single wavelength interference microscopy images.
 

@@ -132,7 +132,7 @@ Optional settings
 
 
 %% INPUT
-Settings.Source = 'E:\20220210_nikon\';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.Source = 'data\20220210_nikon\1-02102022020936-48.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
 Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
 Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
@@ -191,7 +191,7 @@ Settings.Save_Figures = true;                       % LOGIC   Automatically save
     Settings.Save_TIFF = false;                     % LOGIC   Save plot as tiff (note that this is very slow).
     Settings.Save_FIG = true;                       % LOGIC   Save plot as MATLAB fig.
 Settings.Save_Data = true;                          % LOGIC   Save final data as .dat.
-Settings.Save_Folder = 'E:\results';                % STRING  Path where data and figures will be saved (unique folder is created inside).
+Settings.Save_Folder = 'results';                % STRING  Path where data and figures will be saved (unique folder is created inside).
 
 % Peak fitting settings
 Settings.Analyze_TwoPart_IncludeMargin = true;      % LOGIC   only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
