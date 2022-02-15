@@ -91,41 +91,23 @@ now
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_20.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_21.tiff';
 % Settings.Source = 'E:\20220201\Basler_a2A5328-15ucBAS__40087133__20220201_125331578_130.tiff';
-Settings.Source = 'E:\20220201\';
-Settings.TimeInterval = 10;
-Settings.LensMagnification = 'NikonX4'; % if not set, pixels will be use as unit.
-Settings.Interferometry_Center = [4485.5 729.5];
-Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
-Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
-Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 17;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.18;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
-Settings.ImageProcessing.EnhanceContrast = false;
-Settings.IgnoreInside = false;
-Settings.Analyze_TwoParts_CutOff = 1350;
-
-
-Settings.Source = 'E:\20220210_nikon\open air green filter-4x';
-Settings.TimeInterval = 10;
-Settings.LensMagnification = 'ZeisX2'; % if not set, pixels will be use as unit.
-Settings.Interferometry_Center = [4485.5 729.5];
-Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
-Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
-Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
-Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
-Settings.MinPeakDistance_inside = 17;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-    Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.18;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
-Settings.ImageProcessing.EnhanceContrast = false;
-Settings.IgnoreInside = false;
-Settings.Analyze_TwoParts_CutOff = 1350;
-
+% Settings.Source = 'E:\20220201\';
+% Settings.TimeInterval = 10;
+% Settings.LensMagnification = 'ZeisX2'; % if not set, pixels will be use as unit.
+% Settings.Interferometry_Center = [4485.5 729.5];
+% Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
+% Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
+% Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
+% Settings.Smoothing_inside = 10;                  % Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+% Settings.MinPeakDistance_inside = 17;            % Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+% Settings.MinPeakProminence_inside = .08;        % PCutOffIncludeMargineak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+%     Settings.Smoothing_outside = 50;            % Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+%     Settings.MinPeakDistance_outside = 500;      % Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+%     Settings.MinPeakProminence_outside = 0.18;    % Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+% Settings.ImageProcessing.EnhanceContrast = false;
+% Settings.IgnoreInside = false;
+% Settings.Analyze_TwoParts_CutOff = 1350;
+% Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
 
 
 % TODO: settings wizard for analysis settings! Choose prominance etc
@@ -145,73 +127,81 @@ Optional settings
 %}
 
 
-%% SETTINGS
 
-Settings.Lambda = 520e-9;                        % Wavelength of light in meters.
-Settings.RefractiveIndex_Medium = 1.4329;
+% Settings.Source = 'E:\20220210_nikon\open air green filter-4x\';
 
-Settings.Anlysismode_averaging = 2; % 1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 
-Settings.Stitching_AveragePoints = 1;
+%% INPUT
+Settings.Source = 'E:\20220210_nikon\';             % STRING  (Local) path to single image or folder to be analyzed.
+Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
+Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
+Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
+Settings.SectorEnd = pi/16;                         % FLOAT   Note: beyond 3 o'clock not yet supported.
+Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
+    Settings.Analyze_TwoParts_CutOff = 1242;        % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+    Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+    Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+    Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 50;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 100;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
+Settings.IgnoreInside = false;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
+Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
+Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
 
-Settings.ImageSkip = 1;     % Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
-
-Settings.NumberSlices = 1600;                     % Total number of radial slices in the full 2pi
-Settings.AnalyzeSector = true;                   % If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
-%     Settings.SectorStart = (3/2)*pi - pi/16;      % Clockwise from 3 o'clock. 
-%     Settings.SectorEnd = (3/2)*pi + pi/16;        % Note: beyond 3 o'clock not yet supported.
-
-Settings.EstimateOutsides = true;               % If true, before first extrema and after last extrema will be estimated (see documentation).
-
-Settings.FilterBy_AmountExtrema = false;         % TODO needs some work, when some slices are nan.
-    Settings.AmountExtrema_MaxDeviation = 0.05;  % Kick out slice if number of extrema differs > this number from the average number of extrema of all slices.
-
-Settings.HeightResolution = 2e-9;                % Resolution of model fitting. Minimal step size in end result is determined by this. 2nm is decent.
-
-Settings.PlotSingleSlice = 50;                    % Show several analysis steps of a certain slice.
+%% GENERAL SETTINGS
+Settings.Anlysismode_averaging = 2;                 % INT     1 is height profile for each line, than average. 2 is average first, than height profile for single line.
+Settings.Stitching_AveragePoints = 1;               % INT     When stiching this value determines how many points are averaged at start and end of each dataset for use for stitching with previous/next dataset.
+Settings.ImageSkip = 1;                             % INT     Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
+Settings.NumberSlices = 1600;                       % INT     Total number of radial slices in the full 2pi
+Settings.AnalyzeSector = true;                      % LOGIC   If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
+Settings.EstimateOutsides = true;                   % LOGIC   If true, before first extrema and after last extrema will be estimated (see documentation).
+Settings.FilterBy_AmountExtrema = false;            % LOGIC   TODO needs some work, when some slices are nan.
+    Settings.AmountExtrema_MaxDeviation = 0.05;     % FLOAT   Kick out slice if number of extrema differs > this number from the average number of extrema of all slices.
 
 % Display settings (things that show while code is running)
-Settings.Display.IndividualPlots = true;  % only determines showing them to screen, if false, Save_Figures still works.
-Settings.Display.TotalPlots = true;
-Settings.Display.ImageProgress = true;
-    Settings.Display.ImageProgressValue = 1;
-Settings.Display.HeightProfileProgress = false;       % Show progress of Height Profile calculation of all slices. Only visible if LogLevel is 6.
-    Settings.Display.HeightProfileProgressValue = 10;
-Settings.Display.LogoAtStart = true;
+Settings.Display.IndividualPlots = true;            % LOGIC   Individual plots are plots that are made for each frame. Only determines showing them to screen, if false, Save_Figures still works.
+Settings.Display.TotalPlots = true;                 % LOGIC   Total plots are plots that have one instance, created at the end. Only determines showing them to screen, if false, Save_Figures still works.
+Settings.Display.ImageProgress = true;              % LOGIC   Show which image is currently processed. Only visible if LogLevel is 6.
+    Settings.Display.ImageProgressValue = 1;        % FLOAT   Show image progress every x images.
+Settings.Display.HeightProfileProgress = false;     % LOGIC   Show progress of Height Profile calculation of all slices. Only visible if LogLevel is 6.
+    Settings.Display.HeightProfileProgressValue = 10; % FLOAT Show which section of a single slice is currently being processed. Only visible if LogLevel is 6.
+Settings.Display.LogoAtStart = true;                % LOGIC   Show logo and extra info at the start.
     
 % Plotting
-Settings.Plot_VisualizeSlices = true;
-Settings.Plot_SingleSlice = true;
-Settings.Plot_Surface = false; % not working properly
-Settings.Plot_Contour = false; % TODO: not an option is Analysismode_averaging == 2
-    Settings.Plot_Contour_OverlayOnImage = true;
-    Settings.Plot_Contour_Levels = 10;
-    Settings.Plot_Contour_Transparency = 0.6;
-Settings.Plot_AverageHeight = true;                    % Calculate average multiple slices (consider analyzing only a quadrant).
-Settings.Plot_AverageHeightAllImages = true;
-    Settings.Plot_AverageHeightAllImages_EquivPoint = -10;  %This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
-Settings.Plot_ResultPlot = true;
-
-Settings.PlotFontSize = 15;
+Settings.Plot_VisualizeSlices = true;               % LOGIC   Plot original image with overlay of the slices plus two-part-analysis line if set.
+Settings.Plot_SingleSlice = true;                   % LOGIC   Plot analysis for a single slice (raw slice, filtered slice with peak detection, height profile).
+    Settings.PlotSingleSlice = 50;                  % FLOAT   If analysis mode == 1, this value determines which slice is plotted. In mode 2 the average slice is always used.
+Settings.Plot_Surface = false;                      % LOGIC   OUT OF DATE. do not use.
+Settings.Plot_Contour = false;                      % LOGIC   OUT OF DATE. do not use.  TODO: not an option is Analysismode_averaging == 2
+    Settings.Plot_Contour_OverlayOnImage = true;    % LOGIC   Show image underneath contour plot.
+    Settings.Plot_Contour_Levels = 10;              % INT     Number of levels of the contour plot. See MATLAB documentation.
+    Settings.Plot_Contour_Transparency = 0.6;       % FLOAT   Transparancy of contour plot on original image.
+Settings.Plot_AverageHeight = true;                 % LOGIC   Plot the height profile for each image seperately.
+Settings.Plot_AverageHeightAllImages = true;        % LOGIC   Plot all height profiles of all images into a single plot, with colorbar.
+    Settings.Plot_AverageHeightAllImages_EquivPoint = -10;  % INT This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
+Settings.Plot_ResultPlot = true;                    % LOGIC   Plot image, with underneath a combined plot of original slice, filtered slice, detected extrema and height profile.
+Settings.PlotFontSize = 15;                         % INT     FontSize in all plots.
 
 % Saving
-Settings.Save_Figures = true;
-    Settings.Save_PNG = true;
-    Settings.Save_TIFF = false;
-    Settings.Save_FIG = false;
-    Settings.Save_Folder = 'E:\results';
-Settings.Save_Data = true;
+Settings.Save_Figures = true;                       % LOGIC   Automatically save figures (works even if Display.xx = false).
+    Settings.Save_PNG = true;                       % LOGIC   Save plot as png.
+    Settings.Save_TIFF = false;                     % LOGIC   Save plot as tiff (note that this is very slow).
+    Settings.Save_FIG = true;                       % LOGIC   Save plot as MATLAB fig.
+Settings.Save_Data = true;                          % LOGIC   Save final data as .dat.
+Settings.Save_Folder = 'E:\results';                % STRING  Path where data and figures will be saved (unique folder is created inside).
 
 % Peak fitting settings
-Settings.Analyze_TwoPart_IncludeMargin = true;  % only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
+Settings.Analyze_TwoPart_IncludeMargin = true;      % LOGIC   only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
 
 % Conversion pix to SI
-Settings.LensPresets.ZeisX2 = 677;  % Standard presets to use as conversion, assuming in focus. Add like .xMagnification = PixToMm.
-Settings.LensPresets.ZeisX5 = 1837;
-Settings.LensPresets.ZeisX10 = 3679;
-Settings.LensPresets.NikonX2 = 1355;
-Settings.LensPresets.NikonX4 = 2700;
-
+Settings.LensPresets.ZeisX2 = 677;                  % FLOAT   pixels per mm. Standard presets to use as conversion, assuming in focus. Add like .xMagnification = PixToMm.
+Settings.LensPresets.ZeisX5 = 1837;                 % FLOAT   pixels per mm. 
+Settings.LensPresets.ZeisX10 = 3679;                % FLOAT   pixels per mm. 
+Settings.LensPresets.NikonX2 = 1355;                % FLOAT   pixels per mm. 
+Settings.LensPresets.NikonX4 = 2700;                % FLOAT   pixels per mm. 
 
 global LogLevel
 LogLevel = 5;  % Recommended at least 2. To reduce clutter use 5. To show all use 6.
@@ -223,6 +213,7 @@ LogLevel = 5;  % Recommended at least 2. To reduce clutter use 5. To show all us
     5, 'INFO';      % Information about code progress. E.g. 'Figures are being saved'.
     6, 'OK';        % just to show progress is going on as planned.
 %}
+Settings.HeightResolution = 2e-9;                % Resolution of model fitting. Minimal step size in end result is determined by this. 2nm is decent. NO LONGER NEEEDED. REMOVE IN MODELFIT PLEASE.
 
 
 

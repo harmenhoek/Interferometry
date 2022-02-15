@@ -3,13 +3,13 @@ addpath('functions')
 Settings = struct();
 
 Settings.ImageSkip = 1;
-Settings.FrameRate = 10;
-Settings.Resize = .5;
+Settings.FrameRate = 5;
+Settings.Resize = 1;
 Settings.Save_Folder = 'results';
 
 Settings.Time.Interval = 10;
 Settings.Time.ShowTime = true;
-Settings.Time.FontSize = 100;
+Settings.Time.FontSize = 50;
 Settings.Time.Round = 0;
 Settings.Time.Unit = 'min'; %supported: variable, min, sec, hrs, auto
 
