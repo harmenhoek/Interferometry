@@ -132,7 +132,7 @@ Optional settings
 
 
 %% INPUT
-Settings.Source = 'E:\20220210_nikon\';             % STRING  (Local) path to single image or folder to be analyzed.
+Settings.Source = 'E:\20220210_nikon\';             % STRING  (Local) path to single image or folder to be analyzed. 
 Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
 Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
