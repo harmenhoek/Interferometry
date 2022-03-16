@@ -151,8 +151,19 @@ Optional settings
 
 
 %% INPUT
-Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\';             % STRING  (Local) path to single image or folder to be analyzed. 
-Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
+% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
+Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
+    % read from the image filename. This datetime is converted to seconds from start automatically. 
+    % `Settings.TimeIntervalFormat` and `Settings.TimeIntervalFilenameFormat` must be set. If NUMERIC, give the time in 
+    % seconds between each frame.
+    Settings.TimeIntervalFormat = 'MMddyyyyHHmmss';     % STRING datetime format. See MATLAB documentation on datetime.
+    Settings.TimeIntervalFilenameFormat = {'-', '-'};   % CELL with 2 strings giving the pattern before the 
+            % TimeIntervalFormat and after.
+       % example: 1-02012022152110-1015 -->  {'-', '-'}, with Settings.TimeIntervalFormat = "ddMMyyyyHHmmss"
+       % example: recording2022-02-01_15:13:12_image2 --> {'recording','_'}, with .TimeIntervalFormat = "yyyy-MM-dd_HH:mm:ss" 
+                % note that it looks for the last occurance of '_'. '_image' would have given the same result.
 Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
 Settings.Interferometry_Center = [22 893];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
 Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
@@ -354,11 +365,13 @@ if Settings.AnalyzeFolder
 
     if ~isfield(Settings, 'TimeInterval')
         Logging(1, 'TimeInterval is not set. Add "Settings.Timeinterval" to your settings.')
-    elseif ~CheckIfClass('numeric', {'Settings.TimeInterval'})
-        Logging(1, 'Could not continue because of invalid setting (see WARNING above).')
-    else
+    elseif strcmpi(Settings.TimeInterval, 'FromFile')
+        Logging(5, 'Time intervals will be determined from filenames.')
+    elseif CheckIfClass('numeric', {'Settings.TimeInterval'})
         Settings.TimeRange = 0:Settings.TimeInterval:Settings.TimeInterval*Settings.ImageCount_SourceFolder;
         Settings.TimeRange = Settings.TimeRange(1:Settings.ImageSkip:Settings.ImageCount_SourceFolder);
+    else
+        Logging(1, append('No valid setting Settings.TimeInterval= ', num2str(Settings.TimeInterval), '. Should be numeric time interval, or "FromFile".'))
     end
 
 else %input is single file
@@ -389,7 +402,7 @@ if Settings.Save_Figures || Settings.Save_Data
 
     basename = append(savefolder_sub, '\', name, '_', stamp);
     
-    clear stamp savefolder_sub
+    
 end
 
 % Create subfolders for AverageSlice, FinalSlice and Slice 
@@ -426,6 +439,8 @@ else
     basename_Slice = append(savefolder_sub, '\', stamp);
     basename_FinalSlice = append(savefolder_sub, '\', stamp);
 end
+
+clear stamp savefolder_sub
 
 
 if Settings.Save_Figures
@@ -537,6 +552,29 @@ if ~Settings.Display.IndividualPlots; close(f1); end % must close, even if not v
 
 clear f1 f2 k dtheta savename show_slices
 Logging(6, 'Slices determined successfully.')
+
+%% Init and Determine time
+
+Settings.Time = {};
+
+if strcmpi(Settings.TimeInterval, 'FromFile')
+    Logging(5, 'Timestamps are read from image files ...')
+    for i = 1:Settings.ImageCount 
+        Image = Settings.Analysis_ImageList{i};
+        [~, datetimestamp, ext] = fileparts(Image);
+        try
+            datetimestamp_sub = ExtractSubstrFromString(datetimestamp, Settings.TimeIntervalFilenameFormat);
+        catch
+            Logging(1, append('It seems like not all images have the right filename to extract the datetime stamp from it. It could not be determined for: ', datetimestamp, ext, '.'))
+        end
+        Settings.Time{i} = datetime(datetimestamp_sub, 'InputFormat', Settings.TimeIntervalFormat); 
+    end
+    Settings.TimeFromStart = cellfun(@(x) seconds(time(between(Settings.Time{1}, x, 'time'))), Settings.Time);
+elseif CheckIfClass('numeric', {'Settings.TimeInterval'})
+    Settings.TimeFromStart = (1:Settings.ImageCount) * Settings.TimeInterval;
+else
+    Logging(1, append('Settings.TimeInterval= ', num2str(Settings.TimeInterval), ' is not a valid option. Choose "FromFile" or an integer.'))
+end
 
 %% X - Iterate over all images
 
@@ -773,7 +811,7 @@ end
 
 Logging(6, 'Saving finished successfully.')
 
-clear data_cell_noempties points I I_or I_size LogLevel number_extrema slice_lengths theta_all basename
+% clear data_cell_noempties points I I_or I_size LogLevel number_extrema slice_lengths theta_all basename
 % clear save_extensions
 
 %% 7 - Finish

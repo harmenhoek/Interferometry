@@ -170,8 +170,14 @@ classdef Plot
                 else
                     f = figure('visible', 'off');
                 end
+                
+                MinStepSizeTime = min(diff(Settings.TimeFromStart));
+                FullTimeScale = Settings.TimeFromStart(1):MinStepSizeTime:Settings.TimeFromStart(end);
+                map = parula(length(FullTimeScale)); % create colormap with all possible timesteps.
+
+
                 hold on
-                map = parula(length(FigData.HeightProfile_Mean_AllImages));
+%                 map = parula(length(FigData.HeightProfile_Mean_AllImages));
                 
                 if Settings.Plot_AverageHeightAllImages_EquivPoint < 1  % we want EquivPoint to be an Setting, so use negative to work backwards. STUPID MATLAB works with 'end' to indicate last value, so extra code here ...
                     equiv_value = max(cellfun(@(x) x(end+Settings.Plot_AverageHeightAllImages_EquivPoint), FigData.HeightProfile_Mean_AllImages));
@@ -187,19 +193,25 @@ classdef Plot
                         y = y + equiv_value - y(Settings.Plot_AverageHeightAllImages_EquivPoint);
                     end
                     datapoints = length(FigData.HeightProfile_Mean_AllImages{i});
-                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 1e6, 'LineWidth', 2, 'Color', map(i,:))
+
+                    [~, indexOfMin] = min(abs(FullTimeScale-Settings.TimeFromStart(i)))
+                    plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 1e6, 'LineWidth', 2, 'Color', map(indexOfMin,:))
                 end
 %                 legend(append('t=', compose('%g', Settings.TimeRange), 's'))
                 xlabel(sprintf('Distance from center [%s]', Settings.DistanceUnit))
                 ylabel('Height [µm]')
-                if max(Settings.TimeRange) > 600
-                    stepsize = round((max(Settings.TimeRange)/60-min(Settings.TimeRange/60))/5);
-                    barticks = min(Settings.TimeRange):stepsize:max(Settings.TimeRange);
+
+
+
+                
+                if max(Settings.TimeFromStart) > 600
+                    stepsize = round((max(Settings.TimeFromStart)/60-min(Settings.TimeFromStart/60))/5);
+                    barticks = min(Settings.TimeFromStart):stepsize:max(Settings.TimeFromStart);
                     c = colorbar('TickLabels', barticks, 'Ticks', linspace(0,1,6));
                     ylabel(c, 'Time [min]', 'FontSize', Settings.PlotFontSize)
                 else
-                    stepsize = round((max(Settings.TimeRange)-min(Settings.TimeRange))/5);
-                    barticks = min(Settings.TimeRange):stepsize:max(Settings.TimeRange);
+                    stepsize = round((max(Settings.TimeFromStart)-min(Settings.TimeFromStart))/5);
+                    barticks = min(Settings.TimeFromStart):stepsize:max(Settings.TimeFromStart);
                     c = colorbar('TickLabels', barticks, 'Ticks', linspace(0,1,6));
                     ylabel(c, 'Time [s]', 'FontSize', Settings.PlotFontSize)
                 end
