@@ -130,16 +130,35 @@ Optional settings
 
 % Settings.Source = 'E:\20220210_nikon\open air green filter-4x\';
 
+% Settings.Source = 'data\20220210_nikon\1-02102022020936-48.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
+% Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
+% Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+% Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
+% Settings.SectorEnd = pi/16;                         % FLOAT   Note: beyond 3 o'clock not yet supported.
+% Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
+%     Settings.Analyze_TwoParts_CutOff = 1242;        % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+%     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+%     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+%     Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+%     Settings.Smoothing_outside = 50;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+%     Settings.MinPeakDistance_outside = 100;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+%     Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+% Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
+% Settings.IgnoreInside = false;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
+% Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
+% Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
+
 
 %% INPUT
-Settings.Source = 'data\20220210_nikon\1-02102022020936-48.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
-Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
+Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
 Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
-Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+Settings.Interferometry_Center = [22 893];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
 Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
 Settings.SectorEnd = pi/16;                         % FLOAT   Note: beyond 3 o'clock not yet supported.
 Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
-    Settings.Analyze_TwoParts_CutOff = 1242;        % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+    Settings.Analyze_TwoParts_CutOff = 1225;        % INT     Below this datapoint uses _inside settings, after uses _outside settings.
     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
     Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
@@ -358,7 +377,7 @@ save_extensions = NaN;
 basename = '';
 if Settings.Save_Figures || Settings.Save_Data
     [~, name, ~] = fileparts(Settings.Source_ImageList{1});
-    stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
+    stamp = append('PROC',  datestr(now, 'YYYY-mm-dd-HH-MM-SS'));
     savefolder_sub = append(Settings.Save_Folder, '\', stamp);
     [status, msg] = mkdir(savefolder_sub);
 
@@ -372,6 +391,42 @@ if Settings.Save_Figures || Settings.Save_Data
     
     clear stamp savefolder_sub
 end
+
+% Create subfolders for AverageSlice, FinalSlice and Slice 
+if Settings.ImageCount > 1
+    savefolder_sub_AverageSlice = append(savefolder_sub, '\AverageSlice');
+    [status, msg] = mkdir(savefolder_sub_AverageSlice);
+    if status == 0
+        Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub_AverageSlice, '\', '\\'), '" failed! Error: ', msg))
+    else
+        Logging(5, append('Created folder for image saving "', strrep(savefolder_sub_AverageSlice, '\', '\\'), '" successfully.' ))
+    end
+
+    savefolder_sub_Slice = append(savefolder_sub, '\Slice');
+    [status, msg] = mkdir(savefolder_sub_Slice);
+    if status == 0
+        Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub_Slice, '\', '\\'), '" failed! Error: ', msg))
+    else
+        Logging(5, append('Created folder for image saving "', strrep(savefolder_sub_Slice, '\', '\\'), '" successfully.' ))
+    end
+
+    savefolder_sub_FinalSlice = append(savefolder_sub, '\FinalSlice');
+    [status, msg] = mkdir(savefolder_sub_FinalSlice);
+    if status == 0
+        Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub_FinalSlice, '\', '\\'), '" failed! Error: ', msg))
+    else
+        Logging(5, append('Created folder for image saving "', strrep(savefolder_sub_FinalSlice, '\', '\\'), '" successfully.' ))
+    end
+
+    basename_AverageSlice = append(savefolder_sub_AverageSlice, '\', stamp);
+    basename_Slice = append(savefolder_sub_Slice, '\', stamp);
+    basename_FinalSlice = append(savefolder_sub_FinalSlice, '\', stamp);
+else
+    basename_AverageSlice = append(savefolder_sub, '\', stamp);
+    basename_Slice = append(savefolder_sub, '\', stamp);
+    basename_FinalSlice = append(savefolder_sub, '\', stamp);
+end
+
 
 if Settings.Save_Figures
     if ~Settings.Save_PNG && ~Settings.Save_TIFF && ~Settings.Save_FIG
@@ -548,7 +603,7 @@ for i = 1:Settings.ImageCount
             % Plot one slice
             if k == Settings.PlotSingleSlice
                 f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
-                SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
+                SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename_Slice, '_Slice', num2str(k), '_', num2str(i)));
                 if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
             end
     
@@ -591,12 +646,12 @@ for i = 1:Settings.ImageCount
 
         Settings.Plot_ResultPlot = true;
         f9 = Plot.ResultPlot(Settings, struct('Image',Image, 'theta_all',theta_all, 'points',points, 'I',I, 'c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
-        SaveFigure(min([Settings.Save_Figures Settings.Plot_ResultPlot]), f9, save_extensions, append(basename, '_FinalSlice', num2str(k), '_', num2str(i)));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_ResultPlot]), f9, save_extensions, append(basename_FinalSlice, '_FinalSlice', num2str(k), '_', num2str(i)));
         if ~Settings.Display.IndividualPlots; close(f9); end % must close, even if not visible, otherwise in memory
             
         % Plot one slice
         f4 = Plot.SingleSliceAnalysis(Settings, struct('c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
-        SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename, '_Slice', num2str(k), '_', num2str(i)));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_SingleSlice]), f4, save_extensions, append(basename_Slice, '_Slice', num2str(k), '_', num2str(i)));
         if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
 
         HeightProfile_Mean = d_final;
@@ -677,7 +732,7 @@ for i = 1:Settings.ImageCount
     end
     
     f6 = Plot.AverageHeight(Settings, struct('HeightProfile_Mean',HeightProfile_Mean)); %TODO, take mean_array out of here!
-    SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeight]), f6, save_extensions, append(basename, '_AverageSlice', num2str(i)));
+    SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeight]), f6, save_extensions, append(basename_AverageSlice, '_AverageSlice', num2str(i)));
     if ~Settings.Display.IndividualPlots; close(f6); end % must close, even if not visible, otherwise in memory
 
     Logging(6, append('Plotting finished successfully for image ', num2str(i), '.'))
