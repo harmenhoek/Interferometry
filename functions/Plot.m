@@ -5,16 +5,24 @@ classdef Plot
             f = figure('visible', 'on');
             imshow(FigData.I)
             hold on
-            for k = 1:length(FigData.theta_all)
-                pnt = FigData.points(k, :);
-                roi = [pnt; Settings.Interferometry_Center];
+            for k = 1:Settings.NumberSlicesSelection
+                PntStart = floor(FigData.Slice_Startpoints(k, :));
+                PntEnd = floor(FigData.Slice_Endpoints(k, :));
+                roi = [PntEnd; PntStart];
                 plot(roi(:,1), roi(:,2), 'Color', 'red', 'LineWidth', 2)
-                plot(pnt(:,1), pnt(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
-                text(pnt(:,1), pnt(:,2), num2str(k))
+                plot(PntStart(:,1), PntStart(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
+                plot(PntEnd(:,1), PntEnd(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
+                text(PntEnd(:,1), PntEnd(:,2), num2str(k))
                 clear pnt roi
             end
             pnt = drawpoint;
-            Analyze_TwoParts_CutOff = round(norm(pnt.Position-Settings.Interferometry_Center));
+
+            if strcmpi(Settings.SliceType, 'sector')
+                Analyze_TwoParts_CutOff = round(norm(pnt.Position-FigData.Slice_Endpoints(k)));
+            elseif strcmpi(Settings.SliceType, 'linear')
+                Analyze_TwoParts_CutOff = ceil(point_to_line([pnt.Position 0], [Settings.LinearStart 0], [Settings.LinearEnd 0]));
+            end
+
             close(f)
         end % f = VisualizeSlicesCutOff
         
@@ -27,19 +35,33 @@ classdef Plot
                 end
                 imshow(FigData.I)
                 hold on
-                for k = 1:length(FigData.theta_all)
-                    pnt = FigData.points(k, :);
-                    roi = [pnt; Settings.Interferometry_Center];
+                for k = 1:Settings.NumberSlicesSelection
+                    PntStart = floor(FigData.Slice_Startpoints(k, :));
+                    PntEnd = floor(FigData.Slice_Endpoints(k, :));
+                    roi = [PntEnd; PntStart];
+%                     pnt = FigData.points(k, :);
+%                     roi = [pnt; Settings.Interferometry_Center];
                     plot(roi(:,1), roi(:,2), 'Color', 'red', 'LineWidth', 2)
-                    plot(pnt(:,1), pnt(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
-                    text(pnt(:,1), pnt(:,2), num2str(k))
+                    plot(PntStart(:,1)+1, PntStart(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
+                    plot(PntEnd(:,1), PntEnd(:,2), '.', 'Color', 'red' , 'MarkerSize', 20)
+                    text(PntEnd(:,1), PntEnd(:,2), num2str(k))
                     clear pnt roi
                 end
                 if Settings.Analyze_TwoParts
-                    if Settings.AnalyzeSector
-                        plot_arc(Settings.SectorStart, Settings.SectorEnd, Settings.Interferometry_Center(1), Settings.Interferometry_Center(2), Settings.Analyze_TwoParts_CutOff)
-                    else 
-                        plot_arc(0, 2*pi, Settings.Interferometry_Center(1), Settings.Interferometry_Center(2), Settings.Analyze_TwoParts_CutOff)
+                    if strcmpi(Settings.SliceType, 'sector')
+                        if Settings.AnalyzeSector
+                            plot_arc(Settings.SectorStart, Settings.SectorEnd, Settings.SectorCenter(1), Settings.SectorCenter(2), Settings.Analyze_TwoParts_CutOff)
+                        else 
+                            plot_arc(0, 2*pi, Settings.Interferometry_Center(1), Settings.Interferometry_Center(2), Settings.Analyze_TwoParts_CutOff)
+                        end
+                    elseif strcmpi(Settings.SliceType, 'linear')
+                        x1 = Settings.LinearStart(1) + Settings.Analyze_TwoParts_CutOff * cos(Settings.LinearAngle);
+                        y1 = Settings.LinearStart(2) + Settings.Analyze_TwoParts_CutOff * sin(Settings.LinearAngle);
+                        x2 = Settings.LinearEnd(1) + Settings.Analyze_TwoParts_CutOff * cos(Settings.LinearAngle);
+                        y2 = Settings.LinearEnd(2) + Settings.Analyze_TwoParts_CutOff * sin(Settings.LinearAngle);
+                        plot(x1, y1, '.', 'MarkerSize', 25, 'Color', 'black')
+                        plot(x2, y2, '.', 'MarkerSize', 25, 'Color', 'black')
+                        plot([x1 x2], [y1 y2], ':', 'LineWidth', 4, 'Color', 'black')
                     end
                 end
             else
@@ -238,9 +260,13 @@ classdef Plot
                 nexttile([3 3]);
                 imshow(FigData.I)
                 hold on
-                for k = 1:length(FigData.theta_all)
-                    pnt = FigData.points(k, :);
-                    roi = [pnt; Settings.Interferometry_Center];
+                for k = 1:Settings.NumberSlicesSelection
+                    PntStart = floor(FigData.Slice_Startpoints(k, :));
+                    PntEnd = floor(FigData.Slice_Endpoints(k, :));
+                    roi = [PntEnd; PntStart];
+ 
+%                     pnt = FigData.points(k, :);
+%                     roi = [pnt; Settings.Interferometry_Center];
                     plot(roi(:,1), roi(:,2), 'Color', [0.9290 0.6940 0.125 0.2], 'LineWidth', 1)
                     clear pnt roi
                 end
@@ -257,11 +283,15 @@ classdef Plot
                 colororder([clrs(2,:);clrs(1,:)])
                 yyaxis left
                 c_or_nor = (FigData.c_or-min(FigData.c_or))/(max(FigData.c_or)-min(FigData.c_or));
-                plot(x, c_or_nor , '-', 'Color', clrs(5,:), 'LineWidth', 2)
+                if Settings.PeakFitSettings.CutOff %show the cutoff line
+                    plot([1 1].*(max(FigData.Distance_IntersectToEnd)+Settings.PeakFitSettings.CutOffValue)./Settings.ConversionFactorPixToMm, [-0.05 1.05], ':', 'LineWidth', 2, 'Color', 'black')
+                end
                 hold on
+                plot(x, c_or_nor , '-', 'Color', clrs(5,:), 'LineWidth', 2)
                 plot(x, FigData.c_nor,  '-', 'Color', clrs(2,:), 'LineWidth', 2)
                 plot(x(FigData.pks_locs), FigData.pks, '.', 'MarkerSize', 25, 'Color', clrs(2,:))
                 plot(x(FigData.mns_locs), -FigData.mns, '.', 'MarkerSize', 25, 'Color', clrs(2,:))
+               
                 xlabel('Distance from center [pix]')
                 ylabel('Intensity [arb. units]')
                 ylim([-0.05 1.05])
@@ -272,7 +302,7 @@ classdef Plot
                 ylabel('Height [um]')
                 ylim([0 1.01*max(FigData.d_final.*1e6)])
                 xlim([0, max(x)])
-                l = legend({'Average slice', 'Filtered slice', '', '', 'Height profile'}, 'Location', 'best');
+                l = legend({'Fit settings change', 'Average slice', 'Filtered slice', '', '', 'Height profile'}, 'Location', 'best');
                 l.Units = 'normalized';
                 l.Position = [0.7402 0.1267 0.1704 0.0983];
                 
@@ -318,4 +348,10 @@ function P = plot_arc(a,b,h,k,r)
     if ~nargout
         clear P
     end
+end
+
+function d = point_to_line(pt, v1, v2)
+    a = v1 - v2;
+    b = pt - v2;
+    d = norm(cross(a,b)) / norm(a);
 end

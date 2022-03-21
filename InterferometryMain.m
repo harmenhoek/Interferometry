@@ -44,15 +44,15 @@ now
 % variable is not set, a GUI allows you to select it.
 
 % Settings.Source_Filename = 'data\fc2_save_2021-10-20-145841-0667.tif';
-% Settings.Interferometry_Center = 1e3 * [1.9823, 0.8367];
+% Settings.SectorCenter = 1e3 * [1.9823, 0.8367];
 
 % Settings.Source_Filename = 'data\100-3h-11102021102024-0.tiff';
-% Settings.Interferometry_Center = 1e3 * [1.3635, 2.9930];
+% Settings.SectorCenter = 1e3 * [1.3635, 2.9930];
 
 % Settings.Source = 'data\Basler_a2A5328-15ucBAS__40087133__20220124_141421951_36.tiff';
 
 % Settings.Source = 'data\20220124_evaptest_zeiss_greenfilter';
-% Settings.Interferometry_Center = 1e3 * [2.2415, 4.6085];
+% Settings.SectorCenter = 1e3 * [2.2415, 4.6085];
 % Settings.Analyze_TwoParts_CutOff = 1473;
 % Settings.TimeInterval = 10;
 % Settings.ZeisLensMagnification = 'x5'; % if not set, pixels will be use as unit.
@@ -75,7 +75,7 @@ now
 % Settings.Source = 'data\20220131_test\';
 % Settings.TimeInterval = 30*60;
 % Settings.ZeisLensMagnification = 'x2'; % if not set, pixels will be use as unit.
-% Settings.Interferometry_Center = [4533.5 735.5];
+% Settings.SectorCenter = [4533.5 735.5];
 % Settings.SectorStart = pi/2 + pi/8;      % Clockwise from 3 o'clock. 
 % Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
 % Settings.Analyze_TwoParts = false;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
@@ -94,7 +94,7 @@ now
 % Settings.Source = 'E:\20220201\';
 % Settings.TimeInterval = 10;
 % Settings.LensMagnification = 'ZeisX2'; % if not set, pixels will be use as unit.
-% Settings.Interferometry_Center = [4485.5 729.5];
+% Settings.SectorCenter = [4485.5 729.5];
 % Settings.SectorStart = pi/2 + pi/4 + pi/16;      % Clockwise from 3 o'clock. 
 % Settings.SectorEnd = pi - pi/8;        % Note: beyond 3 o'clock not yet supported.
 % Settings.Analyze_TwoParts = true;                % Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup))
@@ -120,7 +120,7 @@ Mandatory settings
     Settings.TimeInterval --> (only mandatory if source is folder) XXX
 
 Optional settings
-    Settings.Interferometry_Center
+    Settings.SectorCenter
     Settings.Analyze_TwoParts_CutOff
     Settings.ZeisLensMagnification
     Settings.ConversionFactorPixToMm
@@ -133,7 +133,7 @@ Optional settings
 % Settings.Source = 'data\20220210_nikon\1-02102022020936-48.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
 % Settings.TimeInterval = 10;                         % FLOAT   Time between frames in second (if multiple images)
 % Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
-% Settings.Interferometry_Center = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+% Settings.SectorCenter = [28 1388];         % ARRAY   Center of the interferometry pattern, from where the slices will originate.
 % Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
 % Settings.SectorEnd = pi/16;                         % FLOAT   Note: beyond 3 o'clock not yet supported.
 % Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
@@ -151,8 +151,8 @@ Optional settings
 
 
 %% INPUT
-% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
-Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
 % Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
 Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
     % read from the image filename. This datetime is converted to seconds from start automatically. 
@@ -165,11 +165,16 @@ Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or
        % example: recording2022-02-01_15:13:12_image2 --> {'recording','_'}, with .TimeIntervalFormat = "yyyy-MM-dd_HH:mm:ss" 
                 % note that it looks for the last occurance of '_'. '_image' would have given the same result.
 Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
-Settings.Interferometry_Center = [22 893];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
-Settings.SectorStart = 0;                           % FLOAT   Clockwise from 3 o'clock. 
-Settings.SectorEnd = pi/16;                         % FLOAT   Note: beyond 3 o'clock not yet supported.
+Settings.SliceType = 'linear';                      % STRING  either sector or linear
+    Settings.SectorCenter = [43 1316];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+    Settings.SectorStart = 0;                           % FLOAT   If SliceType is sector: Clockwise from 3 o'clock. 
+    Settings.SectorEnd = pi/16;                         % FLOAT   If SliceType is sector: Note: beyond 3 o'clock not yet supported.
+    Settings.LinearSliceSpacing = 25;               % INT     Spacing between the slices, in pixels.
+     Settings.LinearStart = [595 1919];              % ARRAY   Start point of sliced area. Between Start and End the slices will be made. Optional: if not set, GUI allows to set.
+     Settings.LinearEnd = [487 2666];                % ARRAY   End point of sliced area. Optional: if not set, GUI allows to set.
+     Settings.LinearAngle = 0.0457*pi;               % FLOAT   Angle between horizontal (x>0) and slice in radians (CW). Note: LinearAngle is decisive, not angle between Start and End. Optional: if not set, GUI allows to set.
 Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
-    Settings.Analyze_TwoParts_CutOff = 1225;        % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+     Settings.Analyze_TwoParts_CutOff = 671;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
     Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
@@ -183,9 +188,9 @@ Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index o
 
 %% GENERAL SETTINGS
 Settings.Anlysismode_averaging = 2;                 % INT     1 is height profile for each line, than average. 2 is average first, than height profile for single line.
-Settings.Stitching_AveragePoints = 1;               % INT     When stiching this value determines how many points are averaged at start and end of each dataset for use for stitching with previous/next dataset.
+Settings.Stitching_AveragePoints = 1;               % INT     When stiching this value determines how many Slice_Endpoints are averaged at start and end of each dataset for use for stitching with previous/next dataset.
 Settings.ImageSkip = 1;                             % INT     Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
-Settings.NumberSlices = 1600;                       % INT     Total number of radial slices in the full 2pi
+Settings.NumberSlices = 500;                        % INT     Total number of radial slices in the full 2pi for SliceType=sector.
 Settings.AnalyzeSector = true;                      % LOGIC   If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
 Settings.EstimateOutsides = true;                   % LOGIC   If true, before first extrema and after last extrema will be estimated (see documentation).
 Settings.FilterBy_AmountExtrema = false;            % LOGIC   TODO needs some work, when some slices are nan.
@@ -196,7 +201,7 @@ Settings.Display.IndividualPlots = true;            % LOGIC   Individual plots a
 Settings.Display.TotalPlots = true;                 % LOGIC   Total plots are plots that have one instance, created at the end. Only determines showing them to screen, if false, Save_Figures still works.
 Settings.Display.ImageProgress = true;              % LOGIC   Show which image is currently processed. Only visible if LogLevel is 6.
     Settings.Display.ImageProgressValue = 1;        % FLOAT   Show image progress every x images.
-Settings.Display.HeightProfileProgress = false;     % LOGIC   Show progress of Height Profile calculation of all slices. Only visible if LogLevel is 6.
+Settings.Display.HeightProfileProgress = true;     % LOGIC   Show progress of Height Profile calculation of all slices. Only visible if LogLevel is 6.
     Settings.Display.HeightProfileProgressValue = 10; % FLOAT Show which section of a single slice is currently being processed. Only visible if LogLevel is 6.
 Settings.Display.LogoAtStart = true;                % LOGIC   Show logo and extra info at the start.
     
@@ -260,7 +265,7 @@ Logging(5, append('Code started on ', datestr(datetime('now')), '.'))
 set(0,'defaultAxesFontSize', Settings.PlotFontSize);
 % set(gca,'TickLabelInterpreter','latex');
 
-status = CheckIfClass('numeric', {'Settings.Lambda', 'Settings.PlotSingleSlice', 'Settings.NumberSlices', 'Settings.SectorStart', 'Settings.SectorEnd', 'Settings.Display.ImageProgressValue', 'Settings.Display.HeightProfileProgressValue'});
+status = CheckIfClass('numeric', {'Settings.Lambda', 'Settings.PlotSingleSlice', 'Settings.NumberSlices', 'Settings.Display.ImageProgressValue', 'Settings.Display.HeightProfileProgressValue'});
 status2 = CheckIfClass('logical', {'Settings.AnalyzeSector', 'Settings.Display.HeightProfileProgress', 'Settings.Display.HeightProfileProgress', 'Settings.FilterBy_AmountExtrema', 'Settings.Plot_AverageHeight', 'Settings.Save_Figures', 'Settings.Save_PNG', 'Settings.Save_TIFF', 'Settings.Save_FIG', 'Settings.Display.LogoAtStart'});
 status3 = CheckIfClass('char', {'Settings.Save_Folder'});
 if min([status, status2, status3]) == 0
@@ -270,24 +275,6 @@ else
 end
 clear status status2 status3
 
-% Check amount of slices
-dtheta = 2*pi / Settings.NumberSlices;
-if Settings.AnalyzeSector
-    theta_all = (ceil(Settings.SectorStart/(2*pi)*Settings.NumberSlices):floor(Settings.SectorEnd/(2*pi)*Settings.NumberSlices)).*dtheta;
-else
-    theta_all = (1:Settings.NumberSlices).*dtheta;
-end
-if Settings.SectorEnd - Settings.SectorStart < 0
-    Logging(1, 'Negative quadrants are not (yet) supported. quadrant_end > quadrant_start.')
-end
-if length(theta_all) < 1 || (length(theta_all) == 1 && isnan(theta_all))
-    Logging(1, 'Amount of slices (slices) should at least be 1. Increase the slices or quadrant size.')
-elseif length(theta_all) > 1000
-    Logging(3, 'Amount of slices (slices) is extremely big and therefore completion may take long. Consider reducing the slices or quadrant size.')
-end    
-if length(theta_all) < Settings.PlotSingleSlice
-    Logging(3, 'Settings.PlotSingleSlice is bigger than the amount of slices. No single slice data will be shown.')
-end
 
 % Correct wavelength for breaking index
 Settings.Lambda_Corrected = Settings.Lambda / Settings.RefractiveIndex_Medium;
@@ -492,6 +479,7 @@ end
     
 
 
+
 clear ext steps maxres minres status msg path name extensions savefolder_sub images_fullpath images
 Logging(6, 'Settings checked and all valid.')
 
@@ -510,47 +498,160 @@ end
 I_size(1) = size(I, 1);
 I_size(2) = size(I, 2);
 
-if ~isfield(Settings, 'Interferometry_Center')
+if ~isfield(Settings, 'SectorCenter') && strcmpi(Settings.SliceType, 'sector')
     Logging(2, 'No image center given in settings, pick image center now.')
     f_temp = figure;
     imshow(I)
     pnt = drawpoint;
-    Settings.Interferometry_Center = pnt.Position;
-    Logging(5, append('Interferometry_Center is ', num2str(Settings.Interferometry_Center), '.'))
+    Settings.SectorCenter = pnt.Position;
+    Logging(5, append('SectorCenter is ', num2str(Settings.SectorCenter), '.'))
     close(f_temp)
 end
 
-clear pnt
+if strcmpi(Settings.SliceType, 'linear') && (~isfield(Settings, 'LinearStart') || ~isfield(Settings, 'LinearEnd') || ~isfield(Settings, 'LinearAngle'))
+    Logging(2, 'Settings.LinearStart, Settings.LinearEnd or Settings.LinearAngle not set, please draw line perpendicular to linear slices.')
+    f_temp = figure;
+    imshow(I)
+    lne = drawline;
+
+
+    [~, idx] = min(lne.Position(:,2)); % we want the smallest y to be point 1
+    Settings.LinearStart = lne.Position(idx,:);
+    Settings.LinearEnd = lne.Position(mod(idx,2)+1,:);
+    % LinearAngle is the angle between positive x-axis and line (CW).
+    
+    Settings.LinearAngle = pi/2 + atan((Settings.LinearEnd(2)-Settings.LinearStart(2))/(Settings.LinearEnd(1)-Settings.LinearStart(1)));
+    Settings.LinearAngle = mod(Settings.LinearAngle, pi); % just to  be sure we stay 0<=LinearAngle<=pi
+
+    Logging(5, append('Settings.LinearStart = [', num2str(Settings.LinearStart(1)), ' ', num2str(Settings.LinearStart(2)), '], Settings.LinearEnd = [', num2str(Settings.LinearEnd(1)), ' ', num2str(Settings.LinearEnd(2)),  '], Settings.LinearAngle = ', num2str(round(Settings.LinearAngle/pi, 5)), '*pi.'))
+    close(f_temp)
+else
+    status = CheckIfClass('numeric', {'Settings.LinearStart', 'Settings.LinearEnd', 'Settings.LinearAngle'});
+    if status == 0
+        Logging(1, 'Could not continue because of invalid settings (see WARNINGs above).')
+    else
+        Logging(6, 'Settings are all of the right type.')
+    end
+    clear status
+end
+
+clear pnt lne
 Logging(6, 'Image loaded successfully.')
 
 %% 2 - Determine slices
 
 Logging(5, '---- Slice determining started.')
 
-points = nan(length(theta_all), 2);
+if strcmpi(Settings.SliceType, 'sector')
+    dtheta = 2*pi / Settings.NumberSlices;
+    if Settings.AnalyzeSector
+        Theta_Slices = (ceil(Settings.SectorStart/(2*pi)*Settings.NumberSlices):floor(Settings.SectorEnd/(2*pi)*Settings.NumberSlices)).*dtheta;
+    else
+        Theta_Slices = (1:Settings.NumberSlices).*dtheta;
+    end
+    if Settings.SectorEnd - Settings.SectorStart < 0
+        Logging(1, 'Negative quadrants are not (yet) supported. quadrant_end > quadrant_start.')
+    end
 
-for k = 1:length(theta_all)
-    theta = theta_all(k);
-    points(k, :) = GetIntersectsImageBorder(Settings.Interferometry_Center, theta, I_size);
-    clear intersect_edge intersect_edge2 polangle idx theta
+    if length(Theta_Slices) < 1 || (length(Theta_Slices) == 1 && isnan(Theta_Slices))
+        Logging(1, 'Amount of slices (slices) should at least be 1. Increase the slices or quadrant size.')
+    elseif length(Theta_Slices) > 1000
+        Logging(3, 'Amount of slices (slices) is extremely big and therefore completion may take long. Consider reducing the slices or quadrant size.')
+    end    
+    if length(Theta_Slices) < Settings.PlotSingleSlice
+        Logging(3, 'Settings.PlotSingleSlice is bigger than the amount of slices. No single slice data will be shown.')
+    end
+
+    Slice_Startpoints = nan(length(Theta_Slices), 2);
+    Slice_Startpoints(:, 1) = Settings.SectorCenter(1);
+    Slice_Startpoints(:, 2) = Settings.SectorCenter(2);
+
+    Slice_Endpoints = nan(length(Theta_Slices), 2);
+
+    for k = 1:length(Theta_Slices)
+        theta = Theta_Slices(k);
+        Slice_Endpoints(k, :) = GetIntersectsImageBorder(Settings.SectorCenter, theta, I_size);
+        clear intersect_edge intersect_edge2 polangle idx theta
+    end
+
+    % Select TwoPart CutOff point
+    if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
+        Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
+        Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I, 'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints));
+        Logging(5, append('Cutoff point for TwoPart analysis (or cutoff) Settings.Analyze_TwoParts_CutOff = ', num2str(Settings.Analyze_TwoParts_CutOff), '.'))
+    end
+    if Settings.Analyze_TwoParts || Settings.IgnoreInside
+        Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
+    end
+    
+    Settings.NumberSlicesSelection = length(Theta_Slices);
+    Distance_IntersectToEnd = zeros(1,Settings.NumberSlicesSelection); %NOT TESTED
+
+    % Visualize slices
+    f1 = Plot.VisualizeSlices(Settings, struct('I',I, 'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints));
+    SaveFigure(min([Settings.Save_Figures Settings.Plot_VisualizeSlices]), f1, save_extensions, append(basename, '_SlicesOverview'));
+    if ~Settings.Display.IndividualPlots; close(f1); end % must close, even if not visible, otherwise in memory.
+
+    clear f1 f2 k dtheta savename show_slices
+
+elseif strcmpi(Settings.SliceType, 'linear')
+
+    %distance between start and endpoint. used to determine number of slices
+    LinearSliceWidth = norm(Settings.LinearStart-Settings.LinearEnd);
+    Settings.NumberSlicesSelection = ceil(LinearSliceWidth / Settings.LinearSliceSpacing);
+
+    Slice_Startpoints = nan(Settings.NumberSlicesSelection, 2);
+    Slice_Endpoints = nan(Settings.NumberSlicesSelection, 2);
+    All_Intersects = cell(1,Settings.NumberSlicesSelection);
+    Distance_IntersectToEnd = nan(Settings.NumberSlicesSelection, 1);
+
+    for k = 1:Settings.NumberSlicesSelection
+        xn = Settings.LinearStart(1) + (k-1) * Settings.LinearSliceSpacing * -sin(Settings.LinearAngle);
+        yn = Settings.LinearStart(2) + (k-1) * Settings.LinearSliceSpacing * cos(Settings.LinearAngle);
+%         xn = Settings.LinearStart(1) + (k-1) * Settings.LinearSliceSpacing * cos(Settings.LinearAngle - pi/2); %- for MATLAB definitions
+%         yn = Settings.LinearStart(2) + (k-1) * Settings.LinearSliceSpacing * -sin(Settings.LinearAngle - pi/2);
+        IntersectPoint = [xn yn]; % We need a list with intersect points to determine. Determine with Interfemetry_Center and shift by Settings.LinearSliceSpacing and angle theta every time.
+        Intersects = GetIntersectsImageBorder2(IntersectPoint, Settings.LinearAngle, I_size);
+        Slice_Startpoints(k, :) = Intersects{1};
+        Slice_Endpoints(k, :) = Intersects{2};
+        All_Intersects{k} = IntersectPoint;
+        Distance_IntersectToEnd(k) = floor(norm(Slice_Startpoints(k, :) - IntersectPoint));
+    end
+
+
+    % Select TwoPart CutOff point
+    if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
+        Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
+        Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I,  'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints));
+        Logging(5, append('Cutoff point for TwoPart analysis (or cutoff) Settings.Analyze_TwoParts_CutOff = ', num2str(Settings.Analyze_TwoParts_CutOff), '.'))
+    end
+
+    if Settings.Analyze_TwoParts || Settings.IgnoreInside
+        Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
+    end
+
+ 
+    % Visualize slices
+    f1 = Plot.VisualizeSlices(Settings, struct('I',I, 'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints));
+    hold on 
+
+    for p = 1:length(All_Intersects)
+        plot(All_Intersects{p}(1), All_Intersects{p}(2), '.', 'MarkerSize', 20, 'Color', 'yellow')
+    end
+    plot(Settings.LinearStart(1), Settings.LinearStart(2), '.', 'MarkerSize', 30, 'Color', 'green')
+    plot(Settings.LinearEnd(1), Settings.LinearEnd(2), '.', 'MarkerSize', 30, 'Color', 'green')
+
+    SaveFigure(min([Settings.Save_Figures Settings.Plot_VisualizeSlices]), f1, save_extensions, append(basename, '_SlicesOverview'));
+    if ~Settings.Display.IndividualPlots; close(f1); end % must close, even if not visible, otherwise in memory
+
+   
+%     clear f1 f2 k dtheta savename show_slices
+
+else
+    Logging(1, append('No valid setting Settings.SliceType= ', num2str(Settings.SliceType), '. Should be "linear" or "sector".'))
 end
 
-% Select TwoPart CutOff point
-if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
-    Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
-    Settings.Analyze_TwoParts_CutOff = Plot.VisualizeSlicesCutOff(Settings, struct('I',I,  'theta_all',theta_all, 'points',points));
-    Logging(5, append('Cutoff point for TwoPart analysis (or cutoff) Settings.Analyze_TwoParts_CutOff = ', num2str(Settings.Analyze_TwoParts_CutOff), '.'))
-end
-if Settings.Analyze_TwoParts || Settings.IgnoreInside
-    Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
-end
 
-% Visualize slices
-f1 = Plot.VisualizeSlices(Settings, struct('I',I,  'theta_all',theta_all, 'points',points));
-SaveFigure(min([Settings.Save_Figures Settings.Plot_VisualizeSlices]), f1, save_extensions, append(basename, '_SlicesOverview'));
-if ~Settings.Display.IndividualPlots; close(f1); end % must close, even if not visible, otherwise in memory
-
-clear f1 f2 k dtheta savename show_slices
 Logging(6, 'Slices determined successfully.')
 
 %% Init and Determine time
@@ -588,13 +689,9 @@ TimeRemaining = Initiate(TimeRemaining,  length(Settings.Analysis_ImageList), 1.
 
 for i = 1:Settings.ImageCount
     TimeRemaining = StartIteration(TimeRemaining);
-    Image = Settings.Analysis_ImageList{i};
-    
-%     if mod(num2str(i), round(Settings.ImageCount/10)) == 0
-%         Logging(5, append("~~~~~~ Height profile calculations for all images at ", num2str(round(i/Settings.ImageCount*10)*10), "% ~~~~~~"))
-%     end
+    Image = Settings.Analysis_ImageList{i}; 
 
-    if mod(i, Settings.Display.ImageProgressValue) == 0 && Settings.Display.ImageProgress
+    if Settings.Display.ImageProgress && mod(i, Settings.Display.ImageProgressValue) == 0
         Logging(6, append("Image ", num2str(i), "/", num2str(Settings.ImageCount), ' being processed.'))
     end
     
@@ -603,22 +700,24 @@ for i = 1:Settings.ImageCount
     I = adapthisteq(I);
     
     %% 3 - Get HeightProfile for all slices
+    
+    
+    HeightProfiles_ForSlices = cell(Settings.NumberSlicesSelection ,1);
+    number_extrema = nan(Settings.NumberSlicesSelection, 2);
+    slice_lengths = nan(Settings.NumberSlicesSelection, 1);
 
-    HeightProfiles_ForSlices = cell(length(theta_all) ,1);
-    number_extrema = nan(length(theta_all), 2);
-    slice_lengths = nan(length(theta_all), 1);
         
     
-    if Settings.Anlysismode_averaging == 1
+    if Settings.Anlysismode_averaging == 1 % DOES NOT SUPPORT LINEAR SLICES YET
 
         no_height_profile = 0;
         first_empty_row = 1;
-        for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
-            if mod(k, round(length(theta_all)/Settings.Display.HeightProfileProgressValue)) == 0 && Settings.Display.HeightProfileProgress
-                Logging(6, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/(length(theta_all)/10)*10), '%.'))
+        for k = 1:length(Slice_Endpoints)  % iterate over all the end Slice_Endpoints (same length as all slices to analyze)
+            if mod(k, round(length(Theta_Slices)/Settings.Display.HeightProfileProgressValue)) == 0 && Settings.Display.HeightProfileProgress
+                Logging(6, append("Height Profile calculation for image ", num2str(i) ," at ", num2str(k/(length(Theta_Slices)/10)*10), '%.'))
             end
-            pnt = floor(points(k, :));
-            roi = [pnt; Settings.Interferometry_Center];
+            pnt = floor(Slice_Endpoints(k, :));
+            roi = [pnt; Settings.SectorCenter];
     
             [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(I, roi, Settings);
             if Settings.IgnoreInside 
@@ -631,7 +730,7 @@ for i = 1:Settings.ImageCount
             number_extrema(k, 1:2) = [length(pks), length(mns)];
             slice_lengths(k) = length(c_or);
     
-            [xx, yy] = fillline(Settings.Interferometry_Center, pnt, length(d_final));
+            [xx, yy] = fillline(Settings.SectorCenter, pnt, length(d_final));
             if length(d_final) ~= 1
                 HeightProfiles_ForSlices{k} = [xx', yy', d_final'];
                 first_empty_row = first_empty_row + length(xx);
@@ -652,21 +751,43 @@ for i = 1:Settings.ImageCount
         
         no_height_profile = 0;
         first_empty_row = 1;
-        cel_AllSlices = cell(1,length(points));
-        for k = 1:length(points)  % iterate over all the end points (same length as all slices to analyze)
-            pnt = floor(points(k, :));
-            roi = [pnt; Settings.Interferometry_Center];
+        cel_AllSlices = cell(1,Settings.NumberSlicesSelection);
+        for k = 1:Settings.NumberSlicesSelection  % iterate over all the end Slice_Endpoints (same length as all slices to analyze)
+            PntStart = floor(Slice_Startpoints(k, :));
+            PntEnd = floor(Slice_Endpoints(k, :));
+            roi = [PntEnd; PntStart];
+
+
+%             pnt = floor(Slice_Endpoints(k, :));
+%             roi = [pnt; Settings.SectorCenter];
             cel_AllSlices{k} = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
         end
-        max_length = max(cellfun(@(x) length(x), cel_AllSlices));
-        arr_AllSlices = nan(length(points), max_length);
-        for m=1:length(cel_AllSlices)
-            arr_AllSlices(m,1:length(cel_AllSlices{m})) = cel_AllSlices{m};
-            arr_AllSlices(m,max_length-length(cel_AllSlices{m})+1:end) = cel_AllSlices{m};
+        % determine the length of the longest slice and include some extra distance, since we need to offset the data to
+        % align better.
+        max_length = max(cellfun(@(x) length(x), cel_AllSlices)) + max(Distance_IntersectToEnd) - min(Distance_IntersectToEnd);
+        arr_AllSlices = nan(length(Slice_Endpoints), max_length);
+        
+        for m=1:Settings.NumberSlicesSelection
+            % We want an array with all the slices, but since the slices have different lengths, we need to fill in nan for
+            % the shorter ones. Also, we want to align the slices on the Slice_Startpoints line in linear case. The latter is
+            % done using the Distance_IntersectToEnd.
+
+            
+            startpnt = max(Distance_IntersectToEnd) - Distance_IntersectToEnd(m) + 1;
+            arr_AllSlices(m, startpnt : startpnt + length(cel_AllSlices{m}) - 1) = flip(cel_AllSlices{m});
+            clear startpnt
+
+
+%             arr_AllSlices(m,1:length(cel_AllSlices{m})) = cel_AllSlices{m}; % CHANGE THIS: now aligning on first datapoints, needs to be on analysis line
+%             arr_AllSlices(m,max_length-length(cel_AllSlices{m})+1:end) = cel_AllSlices{m};
+
         end
+        arr_AllSlices = flip(arr_AllSlices,2);
+
         arr_AverageSlice = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
         
         [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, arr_AverageSlice');
+
 
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;
@@ -676,14 +797,14 @@ for i = 1:Settings.ImageCount
         number_extrema(k, 1:2) = [length(pks), length(mns)];
         slice_lengths(k) = length(c_or);
 
-        [xx, yy] = fillline(Settings.Interferometry_Center, pnt, length(d_final));
+        [xx, yy] = fillline(PntStart, PntEnd, length(d_final));
         if length(d_final) ~= 1
             HeightProfiles_ForSlices{k} = [xx', yy', d_final'];
             first_empty_row = first_empty_row + length(xx);
         end
 
         Settings.Plot_ResultPlot = true;
-        f9 = Plot.ResultPlot(Settings, struct('Image',Image, 'theta_all',theta_all, 'points',points, 'I',I, 'c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k));
+        f9 = Plot.ResultPlot(Settings, struct('Image',Image, 'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints, 'I',I, 'c_or',c_or, 'c_nor',c_nor,  'pks',pks, 'pks_locs',pks_locs, 'mns',mns, 'mns_locs',mns_locs, 'd_final',d_final, 'slicenumber',k, 'Distance_IntersectToEnd', Distance_IntersectToEnd));
         SaveFigure(min([Settings.Save_Figures Settings.Plot_ResultPlot]), f9, save_extensions, append(basename_FinalSlice, '_FinalSlice', num2str(k), '_', num2str(i)));
         if ~Settings.Display.IndividualPlots; close(f9); end % must close, even if not visible, otherwise in memory
             
@@ -699,10 +820,10 @@ for i = 1:Settings.ImageCount
 
 
 
-    if no_height_profile == length(points)
+    if no_height_profile == length(Slice_Endpoints)
         Logging(1, 'No height profiles could be calculated for any of the slices. Check if slices are not to short')
     elseif no_height_profile > 0
-        Logging(3, append('A height profile could not be calculated for ', num2str(no_height_profile), '/', num2str(length(points)), ' slices.'))
+        Logging(3, append('A height profile could not be calculated for ', num2str(no_height_profile), '/', num2str(length(Slice_Endpoints)), ' slices.'))
     else
         Logging(6, 'Height profiles could be calculated for all slices.')
     end
@@ -803,15 +924,13 @@ Logging(5, '---- Saving data started.')
 % Show amount of data that is being saved.
 
 if Settings.Save_Data
-    Slice_Endpoints = points;
-    Theta_Slices = theta_all;
-    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Endpoints', 'HeightProfile_Mean_AllImages', 'Theta_Slices')
+    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Endpoints', 'HeightProfile_Mean_AllImages')
     % note: original slices c are not saved.
 end
 
 Logging(6, 'Saving finished successfully.')
 
-% clear data_cell_noempties points I I_or I_size LogLevel number_extrema slice_lengths theta_all basename
+% clear data_cell_noempties Slice_Endpoints I I_or I_size LogLevel number_extrema slice_lengths Theta_Slices basename
 % clear save_extensions
 
 %% 7 - Finish

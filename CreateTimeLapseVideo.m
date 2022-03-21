@@ -4,14 +4,14 @@ Settings = struct();
 
 Settings.ImageSkip = 1;
 Settings.FrameRate = 15;
-Settings.Resize = .5;
+Settings.Resize = 1;
 Settings.Save_Folder = 'results';
 
-Settings.Time.Interval = 15;
+Settings.Time.Interval = 10*60;
 Settings.Time.ShowTime = true;
-Settings.Time.FontSize = 50;
+Settings.Time.FontSize = 40;
 Settings.Time.Round = 0;
-Settings.Time.Unit = 'min'; %supported: variable, min, sec, hrs, auto
+Settings.Time.Unit = 'variable'; %supported: variable, min, sec, hrs, auto
 
 global LogLevel
 LogLevel = 5;
