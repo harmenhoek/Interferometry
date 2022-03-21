@@ -17,6 +17,23 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % and b are so confusingly used here. Better would be to rewrite
     % function to work from inside to outside ...
 
+    %{
+    Settings needed:
+        Settings.PeakFitSettings.CutOff
+        Settings.PeakFitSettings.CutOffValue
+        Settings.SliceType
+        Settings.PeakFitSettings.a.Smoothing
+        Settings.PeakFitSettings.a.MinPeakProminence
+        Settings.PeakFitSettings.a.MinPeakDistance
+        Settings.PeakFitSettings.b.Smoothing (optional)
+        Settings.PeakFitSettings.b.MinPeakProminence (optional)
+        Settings.PeakFitSettings.b.MinPeakDistance (optional)
+        Settings.Stitching_AveragePoints
+        Settings.Lambda_Corrected
+        Settings.HeightResolution
+        Settings.EstimateOutsides
+    %}
+
     if ~exist('c', 'var')
         c = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)'));
     end
@@ -30,7 +47,8 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         Settings.PeakFitSettings.CutOffValue = length(c) - Settings.PeakFitSettings.CutOffValue;
     end
     c_nor = (c-min(c))/(max(c)-min(c));
-    
+
+  
     if Settings.PeakFitSettings.CutOff
         c_nor_a = smoothdata(c_nor(1:Settings.PeakFitSettings.CutOffValue), 'gaussian', Settings.PeakFitSettings.b.Smoothing);
         c_nor_b = smoothdata(c_nor(Settings.PeakFitSettings.CutOffValue+1:end), 'gaussian', Settings.PeakFitSettings.a.Smoothing);
@@ -38,7 +56,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     else
         c_nor = smoothdata(c_nor, 'gaussian', Settings.PeakFitSettings.a.Smoothing);
     end
-    
+     
     
     % catch really short slices
     if length(c_nor) < 50  % TODO find a nicer way to catch these things
@@ -177,9 +195,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % Note: it happens that the first or last datapoint is actual greater
     % than the average extrema. In that case we assume it to be a real
     % extrema and treat it like any other extrema.
-
     if Settings.EstimateOutsides && length(extr) > 1
-
         min_avg = -mean(mns);
         max_avg = mean(pks);
     
@@ -224,9 +240,8 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
         clear x y x_nor y_nor d b
     
         % fit last extrema to END
-        x = 1:(length(c)-locs(1));
+        x = locs(1)+1:length(c);
         y = c_nor(x);
-        %x_nor = x-x(1); % is already the case? copied from above. Check!
         y_nor = NormalizeData_SmartExtrema(y, Settings.Stitching_AveragePoints);
         [~, y_end] = GetMedians(y, 10);
 
@@ -259,8 +274,8 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                  Logging(6, "END start decreasing, estimated minimum")
             end 
         end
-        d = flip(-d+max(d));
-%         d = flip(d);
+%         d = flip(-d+max(d));
+        d = flip(d);
         d_all = [{d}, d_all];
         clear x y x_nor y_nor d b y_start y_end
 
@@ -277,12 +292,16 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
    
     
     %% Stitching data together.
+
+  
     
     %updated: 3-2-2022
     lastvalues = cumsum(cellfun(@(x) median(x(find(~isnan(x), 1, 'last'))), d_all), 'omitnan'); %exlude nans
     for i=2:length(d_all)
         d_all{i} = d_all{i} + lastvalues(i-1);
     end
+    
+    
     d_final = cell2mat(d_all);
     
     %% Flipping data
