@@ -151,8 +151,8 @@ Optional settings
 
 
 %% INPUT
-Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
-% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
 % Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
 Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
     % read from the image filename. This datetime is converted to seconds from start automatically. 
@@ -477,6 +477,18 @@ if ~Settings.Save_Data
     Logging(3, 'Data will not be saved!')
 end
     
+% Save current git hash_string to Settings, also hostname
+try
+    [~, Settings.GitHashString] = system('git rev-parse HEAD');
+    [~, Settings.GitRemoteUrl]  = system('git remote -v');
+    [~, Settings.HostName] = system('hostname');
+    Logging(6, 'Git Hash Stringm Git Remote Url and hostname determined successfully.')
+catch
+    Logging(3, 'Git Hash String, Git Remote Url and hostname could not be determined. No reference to code used is saved.')
+    Settings.GitHashString = 'Could not be determined.';
+    Settings.GitRemoteUrl = 'Could not be determined.';
+    Settings.HostName = 'Could not be determined.';
+end
 
 
 
@@ -651,7 +663,7 @@ else
     Logging(1, append('No valid setting Settings.SliceType= ', num2str(Settings.SliceType), '. Should be "linear" or "sector".'))
 end
 
-
+clear All_Intersects p IntersectPoint xn yn
 Logging(6, 'Slices determined successfully.')
 
 %% Init and Determine time
@@ -676,6 +688,8 @@ elseif CheckIfClass('numeric', {'Settings.TimeInterval'})
 else
     Logging(1, append('Settings.TimeInterval= ', num2str(Settings.TimeInterval), ' is not a valid option. Choose "FromFile" or an integer.'))
 end
+
+clear ext
 
 %% X - Iterate over all images
 
@@ -703,6 +717,7 @@ for i = 1:Settings.ImageCount
     
     
     HeightProfiles_ForSlices = cell(Settings.NumberSlicesSelection ,1);
+    cel_AllAverageSlices = cell(Settings.NumberSlicesSelection ,1);
     number_extrema = nan(Settings.NumberSlicesSelection, 2);
     slice_lengths = nan(Settings.NumberSlicesSelection, 1);
 
@@ -784,9 +799,9 @@ for i = 1:Settings.ImageCount
         end
         arr_AllSlices = flip(arr_AllSlices,2);
 
-        arr_AverageSlice = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
+        cel_AllAverageSlices{i} = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
         
-        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, arr_AverageSlice');
+        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, cel_AllAverageSlices{i}');
 
 
         if Settings.IgnoreInside 
@@ -814,7 +829,7 @@ for i = 1:Settings.ImageCount
         if ~Settings.Display.IndividualPlots; close(f4); end % must close, even if not visible, otherwise in memory
 
         HeightProfile_Mean = d_final;
-%         clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final
+        clear pnt roi xx yy c_l c_nor c_or mns_locs pks_locs pks mns d_final m arr_AllSlices max_length cel_AllSlices PntEnd PntStart
 
     end
 
@@ -900,7 +915,7 @@ for i = 1:Settings.ImageCount
     HeightProfiles_ForSlices_AllImages{i} = HeightProfiles_ForSlices;
     HeightProfile_Mean_AllImages{i} = HeightProfile_Mean;
     
-    clear f5 f6 f7 f8 data data_all
+    clear f5 f6 f7 f8 data data_all HeightProfiles_ForSlices HeightProfile_Mean Image
     
     [TimeRemaining, TimeLeft] = EndIteration(TimeRemaining);
     if TimeLeft
@@ -908,7 +923,7 @@ for i = 1:Settings.ImageCount
     end
 end % iterate over all images
 
-clear i tStart TimeRemaining
+clear i tStart TimeRemaining TimeLeft
 
 %% X - Plot total data
 
@@ -916,6 +931,7 @@ if Settings.ImageCount > 1
     f8 = Plot.AverageHeight_AllImages(Settings, struct('HeightProfile_Mean_AllImages', {HeightProfile_Mean_AllImages}));
     SaveFigure(min([Settings.Save_Figures Settings.Plot_AverageHeightAllImages]), f8, save_extensions, append(basename, '_AverageSlice_total'));
 end
+clear f8
 
 %% 6 - Save data
 
@@ -924,14 +940,15 @@ Logging(5, '---- Saving data started.')
 % Show amount of data that is being saved.
 
 if Settings.Save_Data
-    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Endpoints', 'HeightProfile_Mean_AllImages')
+    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Startpoints', 'Slice_Endpoints', 'HeightProfile_Mean_AllImages')
     % note: original slices c are not saved.
 end
 
 Logging(6, 'Saving finished successfully.')
 
-% clear data_cell_noempties Slice_Endpoints I I_or I_size LogLevel number_extrema slice_lengths Theta_Slices basename
-% clear save_extensions
+clear data_cell_noempties Slice_Endpoints I I_or I_size LogLevel number_extrema slice_lengths Theta_Slices basename ...
+    basename_AverageSlice basename_Slice basename_FinalSlice f1 f8 f9 datetimestamp_sub datetimestamp save_extensions ...
+    Slice_Startpoints
 
 %% 7 - Finish
 

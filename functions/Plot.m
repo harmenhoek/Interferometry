@@ -216,7 +216,7 @@ classdef Plot
                     end
                     datapoints = length(FigData.HeightProfile_Mean_AllImages{i});
 
-                    [~, indexOfMin] = min(abs(FullTimeScale-Settings.TimeFromStart(i)))
+                    [~, indexOfMin] = min(abs(FullTimeScale-Settings.TimeFromStart(i)));
                     plot((1:datapoints) ./ Settings.ConversionFactorPixToMm, y * 1e6, 'LineWidth', 2, 'Color', map(indexOfMin,:))
                 end
 %                 legend(append('t=', compose('%g', Settings.TimeRange), 's'))
