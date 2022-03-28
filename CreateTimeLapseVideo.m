@@ -5,13 +5,12 @@ Settings = struct();
 Settings.ImageSkip = 1;
 Settings.FrameRate = 15;
 Settings.Resize = 1;
-Settings.Save_Folder = 'results';
+Settings.Save_Folder = 'E:\results';
 
-Settings.Time.Interval = 10*60;
+Settings.Time.Interval = 60;
 Settings.Time.ShowTime = true;
-Settings.Time.FontSize = 40;
 Settings.Time.Round = 0;
-Settings.Time.Unit = 'variable'; %supported: variable, min, sec, hrs, auto
+Settings.Time.Unit = 'min'; %supported: variable, min, sec, hrs, auto
 
 global LogLevel
 LogLevel = 5;
@@ -50,13 +49,26 @@ end
 
 % TODO link to original file, and save in more reasonable folder.
 
-[~, name, ~] = fileparts(Settings.Source_ImageList{1});
-stamp = append('PROC',  datestr(now, 'YYYYmmddHHMMSS'));
-savefolder_sub = append(Settings.Save_Folder, '\', stamp);
+folders = strsplit(strrep(Settings.Source, '\', '/'), '/');
+if folders{end}
+    upperfolder = folders{end};
+else
+    upperfolder = '';
+end
+Settings.Stamp = append('PROC',  datestr(now, 'YYYY-mm-dd-HH-MM-SS_'), upperfolder);
+savefolder_sub = append(Settings.Save_Folder, '\', Settings.Stamp);
+clear folders upperfolder
+
+%% Determine FontSize
+
+img = imread(Settings.Analysis_ImageList{1});
+img_width = size(img, 2);
+Settings.Time.FontSize = img_width / 40;
+clear img img_width
 
 %% Create video
 
-outputVideo = VideoWriter(append(Settings.Save_Folder, '\', stamp));
+outputVideo = VideoWriter(append(Settings.Save_Folder, '\', Settings.Stamp));
 outputVideo.FrameRate = Settings.FrameRate;
 
 TimeRemaining = TimeTracker;

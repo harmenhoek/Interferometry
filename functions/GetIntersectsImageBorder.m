@@ -23,11 +23,19 @@ function intersect = GetIntersectsImageBorder(intersect_point, theta, image_size
     intersect_edge2 = {intersect_edge(1:2), intersect_edge(3:4)};  %cell version
     [polangle, ~] = cart2pol(intersect_edge([1 3])-intersect_point(1), intersect_edge([2 4])-intersect_point(2));
     polangle = mod(polangle, 2*pi);  % convert -pi to pi (matlab standard for polar) to 0 to 2pi.
-    [~, idx] = min(abs(polangle - theta));  % find which one is closest to the angle we look for (should be exactly the same)
+
+    % We need to round to n decimal places, since intersect may give angle differences of 1e-16 difference. MATLAB ......
+    polangle = round(polangle, 2);
+
+    if polangle(1) == polangle(2) % intersects out of image have this. in that case take longest
+        [~, idx] = max([norm(intersect_point-intersect_edge(1:2)) norm(intersect_point-intersect_edge(3:4))]);
+    else
+        [~, idx] = min(abs(polangle - theta));  % find which one is closest to the angle we look for (should be exactly the same)
+    end
 
     %update 16-3-2022: if interferometry center (intersect_point) is outside image, we want to max value. So, we calculate
     %distance from image center, and pick biggest one.
-%     distance_start = [norm(intersect_edge2{1}-[0 0]) norm(intersect_edge2{2}-[0 0])];
+%     distance_start = [norm(intersect_edge2{1}-[0 0]) norm(intersect_edge2{2}-[0 0])];  
 %     [~, idx2] = max(distance_start);
     
 

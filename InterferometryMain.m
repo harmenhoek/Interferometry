@@ -150,12 +150,88 @@ Optional settings
 % Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
 
 
-%% INPUT
-Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
-% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
-% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\';             % STRING  (Local) path to single image or folder to be analyzed. 
-Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
+% %% INPUT
+% Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\1-02112022023441-96.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% % Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\testset\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% % Settings.Source = 'E:\H-TK\H-TK\closed cell green filter 4x\10min_interval\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
+% % Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
+%     % read from the image filename. This datetime is converted to seconds from start automatically. 
+%     % `Settings.TimeIntervalFormat` and `Settings.TimeIntervalFilenameFormat` must be set. If NUMERIC, give the time in 
+%     % seconds between each frame.
+%     Settings.TimeIntervalFormat = 'MMddyyyyHHmmss';     % STRING datetime format. See MATLAB documentation on datetime.
+%     Settings.TimeIntervalFilenameFormat = {'-', '-'};   % CELL with 2 strings giving the pattern before the 
+%             % TimeIntervalFormat and after.
+%        % example: 1-02012022152110-1015 -->  {'-', '-'}, with Settings.TimeIntervalFormat = "ddMMyyyyHHmmss"
+%        % example: recording2022-02-01_15:13:12_image2 --> {'recording','_'}, with .TimeIntervalFormat = "yyyy-MM-dd_HH:mm:ss" 
+%                 % note that it looks for the last occurance of '_'. '_image' would have given the same result.
+% Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
+% Settings.SliceType = 'linear';                      % STRING  either sector or linear
+%     Settings.SectorCenter = [43 1316];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+%     Settings.SectorStart = 0;                           % FLOAT   If SliceType is sector: Clockwise from 3 o'clock. 
+%     Settings.SectorEnd = pi/16;                         % FLOAT   If SliceType is sector: Note: beyond 3 o'clock not yet supported.
+%     Settings.LinearSliceSpacing = 10;               % INT     Spacing between the slices, in pixels.
+%     Settings.LinearStart = [541 2435];              % ARRAY   Start point of sliced area. Between Start and End the slices will be made. Optional: if not set, GUI allows to set.
+%     Settings.LinearEnd = [511 2591];                % ARRAY   End point of sliced area. Optional: if not set, GUI allows to set.
+%     Settings.LinearAngle = 0.06048*pi;               % FLOAT   Angle between horizontal (x>0) and slice in radians (CW). Note: LinearAngle is decisive, not angle between Start and End. Optional: if not set, GUI allows to set.
+% Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
+%     Settings.Analyze_TwoParts_CutOff = 437;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+%     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+%     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+%     Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+%     Settings.Smoothing_outside = 50;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+%     Settings.MinPeakDistance_outside = 100;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+%     Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+% Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
+% Settings.IgnoreInside = false;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
+% Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
+% Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
+
+% %% INPUT
+% Settings.Source = 'E:\spreading experiments\LTN\part2';             % STRING  (Local) path to single image or folder to be analyzed. 
+% % Settings.Source = 'E:\spreading experiments\LTN\part2\1-03192022054205-71.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% % Settings.Source = 'E:\spreading experiments\LTN\part2\1-03182022180202-1.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% % Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
 % Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
+%     % read from the image filename. This datetime is converted to seconds from start automatically. 
+%     % `Settings.TimeIntervalFormat` and `Settings.TimeIntervalFilenameFormat` must be set. If NUMERIC, give the time in 
+%     % seconds between each frame.
+%     Settings.TimeIntervalFormat = 'MMddyyyyHHmmss';     % STRING datetime format. See MATLAB documentation on datetime.
+%     Settings.TimeIntervalFilenameFormat = {'-', '-'};   % CELL with 2 strings giving the pattern before the 
+%             % TimeIntervalFormat and after.
+%        % example: 1-02012022152110-1015 -->  {'-', '-'}, with Settings.TimeIntervalFormat = "ddMMyyyyHHmmss"
+%        % example: recording2022-02-01_15:13:12_image2 --> {'recording','_'}, with .TimeIntervalFormat = "yyyy-MM-dd_HH:mm:ss" 
+%                 % note that it looks for the last occurance of '_'. '_image' would have given the same result.
+% Settings.LensMagnification = 'NikonX2';             % STRING  if not set, pixels will be use as unit.
+% Settings.SliceType = 'sector';                      % STRING  either sector or linear
+%       Settings.SectorCenter = [2107 4400];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+%      Settings.SectorStart = pi;                           % FLOAT   If SliceType is sector: Clockwise from 3 o'clock. 
+%      Settings.SectorEnd = 2*pi;                         % FLOAT   If SliceType is sector: Note: beyond 3 o'clock not yet supported.
+%     Settings.LinearSliceSpacing = 10;               % INT     Spacing between the slices, in pixels.
+%      Settings.LinearStart = [1564 2159];              % ARRAY   Start point of sliced area. Between Start and End the slices will be made. Optional: if not set, GUI allows to set.
+%      Settings.LinearEnd = [1972 2336];                % ARRAY   End point of sliced area. Optional: if not set, GUI allows to set.
+%      Settings.LinearAngle = 0.63029*pi;               % FLOAT   Angle between horizontal (x>0) and slice in radians (CW). Note: LinearAngle is decisive, not angle between Start and End. Optional: if not set, GUI allows to set.
+% Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
+%   Settings.Analyze_TwoParts_CutOff = 1900;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+%     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
+%     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
+%     Settings.MinPeakProminence_inside = .06;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+%     Settings.Smoothing_outside = 50;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+%     Settings.MinPeakDistance_outside = 100;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+%     Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+% Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
+% Settings.IgnoreInside = false;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
+% Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
+% Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
+
+
+%% INPUT
+% Settings.Source = 'E:\spreading experiments\HTK_selection\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\spreading experiments\HTK_selection\1-03212022170011-44.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+Settings.Source = 'E:\spreading experiments\HTK_selection\1-03212022171412-58.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+
+% Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
+Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
     % read from the image filename. This datetime is converted to seconds from start automatically. 
     % `Settings.TimeIntervalFormat` and `Settings.TimeIntervalFilenameFormat` must be set. If NUMERIC, give the time in 
     % seconds between each frame.
@@ -165,33 +241,39 @@ Settings.TimeInterval = 600;                        % FLOAT   Time between frame
        % example: 1-02012022152110-1015 -->  {'-', '-'}, with Settings.TimeIntervalFormat = "ddMMyyyyHHmmss"
        % example: recording2022-02-01_15:13:12_image2 --> {'recording','_'}, with .TimeIntervalFormat = "yyyy-MM-dd_HH:mm:ss" 
                 % note that it looks for the last occurance of '_'. '_image' would have given the same result.
-Settings.LensMagnification = 'NikonX4';             % STRING  if not set, pixels will be use as unit.
-Settings.SliceType = 'linear';                      % STRING  either sector or linear
-    Settings.SectorCenter = [43 1316];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
-    Settings.SectorStart = 0;                           % FLOAT   If SliceType is sector: Clockwise from 3 o'clock. 
-    Settings.SectorEnd = pi/16;                         % FLOAT   If SliceType is sector: Note: beyond 3 o'clock not yet supported.
-    Settings.LinearSliceSpacing = 10;               % INT     Spacing between the slices, in pixels.
+
+OutOfImageOffset = 700;
+
+Settings.LensMagnification = 'NikonX2';             % STRING  if not set, pixels will be use as unit.
+Settings.SliceType = 'sector';                      % STRING  either sector or linear
+    Settings.SectorCenter = [2014 2996+OutOfImageOffset];          % ARRAY   Center of the interferometry pattern, from where the slices will originate.
+    Settings.SectorStart = pi + pi/4;                           % FLOAT   If SliceType is sector: Clockwise from 3 o'clock. 
+    Settings.SectorEnd = pi + pi/4 + pi/2;                         % FLOAT   If SliceType is sector: Note: beyond 3 o'clock not yet supported.
+%     Settings.LinearSliceSpacing = 10;               % INT     Spacing between the slices, in pixels.
     Settings.LinearStart = [541 2435];              % ARRAY   Start point of sliced area. Between Start and End the slices will be made. Optional: if not set, GUI allows to set.
     Settings.LinearEnd = [511 2591];                % ARRAY   End point of sliced area. Optional: if not set, GUI allows to set.
     Settings.LinearAngle = 0.06048*pi;               % FLOAT   Angle between horizontal (x>0) and slice in radians (CW). Note: LinearAngle is decisive, not angle between Start and End. Optional: if not set, GUI allows to set.
 Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
-    Settings.Analyze_TwoParts_CutOff = 437;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+    Settings.Analyze_TwoParts_CutOff = 500+OutOfImageOffset;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
-    Settings.MinPeakProminence_inside = .08;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 50;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-    Settings.MinPeakDistance_outside = 100;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_inside = .06;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
+    Settings.Smoothing_outside = 80;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 30;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
     Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
-Settings.IgnoreInside = false;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
+Settings.IgnoreInside = true;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
 Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
 Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index of the medium.
+
+
+
 
 %% GENERAL SETTINGS
 Settings.Anlysismode_averaging = 2;                 % INT     1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 Settings.Stitching_AveragePoints = 1;               % INT     When stiching this value determines how many Slice_Endpoints are averaged at start and end of each dataset for use for stitching with previous/next dataset.
 Settings.ImageSkip = 1;                             % INT     Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
-Settings.NumberSlices = 500;                        % INT     Total number of radial slices in the full 2pi for SliceType=sector.
+Settings.NumberSlices = 400;                        % INT     Total number of radial slices in the full 2pi for SliceType=sector.
 Settings.AnalyzeSector = true;                      % LOGIC   If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
 Settings.EstimateOutsides = true;                   % LOGIC   If true, before first extrema and after last extrema will be estimated (see documentation).
 Settings.FilterBy_AmountExtrema = false;            % LOGIC   TODO needs some work, when some slices are nan.
@@ -210,7 +292,7 @@ Settings.Display.LogoAtStart = true;                % LOGIC   Show logo and extr
 Settings.Plot_VisualizeSlices = true;               % LOGIC   Plot original image with overlay of the slices plus two-part-analysis line if set.
 Settings.Plot_SingleSlice = true;                   % LOGIC   Plot analysis for a single slice (raw slice, filtered slice with peak detection, height profile).
     Settings.PlotSingleSlice = 50;                  % FLOAT   If analysis mode == 1, this value determines which slice is plotted. In mode 2 the average slice is always used.
-Settings.Plot_Surface = false;                      % LOGIC   OUT OF DATE. do not use.
+Settings.Plot_Surface = true;                      % LOGIC   OUT OF DATE. do not use.
 Settings.Plot_Contour = false;                      % LOGIC   OUT OF DATE. do not use.  TODO: not an option is Analysismode_averaging == 2
     Settings.Plot_Contour_OverlayOnImage = true;    % LOGIC   Show image underneath contour plot.
     Settings.Plot_Contour_Levels = 10;              % INT     Number of levels of the contour plot. See MATLAB documentation.
@@ -227,7 +309,7 @@ Settings.Save_Figures = true;                       % LOGIC   Automatically save
     Settings.Save_TIFF = false;                     % LOGIC   Save plot as tiff (note that this is very slow).
     Settings.Save_FIG = true;                       % LOGIC   Save plot as MATLAB fig.
 Settings.Save_Data = true;                          % LOGIC   Save final data as .dat.
-Settings.Save_Folder = 'results';                % STRING  Path where data and figures will be saved (unique folder is created inside).
+Settings.Save_Folder = 'E:\results';                % STRING  Path where data and figures will be saved (unique folder is created inside).
 
 % Peak fitting settings
 Settings.Analyze_TwoPart_IncludeMargin = true;      % LOGIC   only if twoparts is on. This includes a little (till first extrema in innter dataset) of the inner data into the outer data set. This ensure an extrema close to the boundary can be found.
@@ -587,6 +669,9 @@ if strcmpi(Settings.SliceType, 'sector')
         clear intersect_edge intersect_edge2 polangle idx theta
     end
 
+    Settings.NumberSlicesSelection = length(Theta_Slices);
+    Distance_IntersectToEnd = zeros(1,Settings.NumberSlicesSelection); %NOT TESTED
+
     % Select TwoPart CutOff point
     if (Settings.Analyze_TwoParts || Settings.IgnoreInside) && ~isfield(Settings, 'Analyze_TwoParts_CutOff')
         Logging(2, 'No cutoff point chosen for TwoPart analysis of data. Please select now.')
@@ -596,9 +681,6 @@ if strcmpi(Settings.SliceType, 'sector')
     if Settings.Analyze_TwoParts || Settings.IgnoreInside
         Settings.PeakFitSettings.CutOffValue = Settings.Analyze_TwoParts_CutOff;
     end
-    
-    Settings.NumberSlicesSelection = length(Theta_Slices);
-    Distance_IntersectToEnd = zeros(1,Settings.NumberSlicesSelection); %NOT TESTED
 
     % Visualize slices
     f1 = Plot.VisualizeSlices(Settings, struct('I',I, 'Slice_Startpoints',Slice_Startpoints, 'Slice_Endpoints',Slice_Endpoints));
@@ -619,14 +701,14 @@ elseif strcmpi(Settings.SliceType, 'linear')
     Distance_IntersectToEnd = nan(Settings.NumberSlicesSelection, 1);
 
     for k = 1:Settings.NumberSlicesSelection
-        xn = Settings.LinearStart(1) + (k-1) * Settings.LinearSliceSpacing * -sin(Settings.LinearAngle);
-        yn = Settings.LinearStart(2) + (k-1) * Settings.LinearSliceSpacing * cos(Settings.LinearAngle);
+        xn = Settings.LinearStart(1) + (k-1) * Settings.LinearSliceSpacing * sin(Settings.LinearAngle);
+        yn = Settings.LinearStart(2) + (k-1) * Settings.LinearSliceSpacing * -cos(Settings.LinearAngle);
 %         xn = Settings.LinearStart(1) + (k-1) * Settings.LinearSliceSpacing * cos(Settings.LinearAngle - pi/2); %- for MATLAB definitions
 %         yn = Settings.LinearStart(2) + (k-1) * Settings.LinearSliceSpacing * -sin(Settings.LinearAngle - pi/2);
         IntersectPoint = [xn yn]; % We need a list with intersect points to determine. Determine with Interfemetry_Center and shift by Settings.LinearSliceSpacing and angle theta every time.
         Intersects = GetIntersectsImageBorder2(IntersectPoint, Settings.LinearAngle, I_size);
-        Slice_Startpoints(k, :) = Intersects{1};
-        Slice_Endpoints(k, :) = Intersects{2};
+        Slice_Startpoints(k, :) = Intersects{2};
+        Slice_Endpoints(k, :) = Intersects{1};
         All_Intersects{k} = IntersectPoint;
         Distance_IntersectToEnd(k) = floor(norm(Slice_Startpoints(k, :) - IntersectPoint));
     end
@@ -938,14 +1020,11 @@ clear f8
 
 Logging(5, '---- Saving data started.')
 
-% Show amount of data that is being saved.
-
 if Settings.Save_Data
-    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Startpoints', 'Slice_Endpoints', 'HeightProfile_Mean_AllImages')
-    % note: original slices c are not saved.
+    save(append(basename, '_results.mat'), 'Settings', 'HeightProfiles_ForSlices_AllImages', 'Slice_Startpoints', ...
+        'Slice_Endpoints', 'HeightProfile_Mean_AllImages', 'cel_AllAverageSlices')
+    Logging(6, 'Saving finished successfully.')
 end
-
-Logging(6, 'Saving finished successfully.')
 
 clear data_cell_noempties Slice_Endpoints I I_or I_size LogLevel number_extrema slice_lengths Theta_Slices basename ...
     basename_AverageSlice basename_Slice basename_FinalSlice f1 f8 f9 datetimestamp_sub datetimestamp save_extensions ...

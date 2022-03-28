@@ -42,7 +42,14 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     
     % check if splitting is possible if CutOff isset.
     if Settings.PeakFitSettings.CutOff && Settings.PeakFitSettings.CutOffValue > length(c)
-        Logging(1, append('The CutOff value (', num2str(Settings.PeakFitSettings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
+%         Logging(1, append('The CutOff value (', num2str(Settings.PeakFitSettings.CutOffValue), ') for peak fitting is bigger than the total slice length (', num2str(length(c)), ').'))
+ pks = [];
+        pks_locs = [];
+        mns = [];
+        mns_locs = [];
+        d_final = [];
+        c_nor = [];
+        return
     elseif Settings.PeakFitSettings.CutOff && strcmpi(Settings.SliceType, 'sector')
         Settings.PeakFitSettings.CutOffValue = length(c) - Settings.PeakFitSettings.CutOffValue;
     end
@@ -195,9 +202,16 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     % Note: it happens that the first or last datapoint is actual greater
     % than the average extrema. In that case we assume it to be a real
     % extrema and treat it like any other extrema.
-    if Settings.EstimateOutsides && length(extr) > 1
+    if Settings.EstimateOutsides && length(extr) > 0
         min_avg = -mean(mns);
         max_avg = mean(pks);
+
+        if isnan(max_avg) % catch the case when we have only 1 min or max, and still want to fit outsides.
+            max_avg = 1;
+        end
+        if isnan(min_avg)
+            min_avg = 0;
+        end
     
         % fit from START to first extrema
         x = 1:locs(end);
@@ -229,6 +243,7 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
                 % scaling from 0-1 we scale from 0 to 1-b, where be is the
                 % difference between the estimated actual max (max_avg) and
                 % our max (abs(max(y)-max_avg)).
+
                 b = abs(max(y)-max_avg); % NOT TESTED ... No dataset ...
                 y_nor = y_nor*(1-b);
                 d = ModelFit(y_nor, Settings.Lambda_Corrected, Settings.HeightResolution);
@@ -275,7 +290,10 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
             end 
         end
 %         d = flip(-d+max(d));
-        d = flip(d);
+        
+%         d = flip(d);
+%       d = fliplr(d);
+%      d = d+2*-min(d); 
         d_all = [{d}, d_all];
         clear x y x_nor y_nor d b y_start y_end
 
@@ -293,8 +311,6 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
     
     %% Stitching data together.
 
-  
-    
     %updated: 3-2-2022
     lastvalues = cumsum(cellfun(@(x) median(x(find(~isnan(x), 1, 'last'))), d_all), 'omitnan'); %exlude nans
     for i=2:length(d_all)
