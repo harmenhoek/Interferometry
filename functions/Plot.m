@@ -317,7 +317,34 @@ classdef Plot
             else
                 f = [];
             end
-        end % f = AverageHeight
+        end % f = ResultPlot
+
+
+        function f = SliceImage(Settings, FigData)
+            if Settings.Plot_SliceImage && (Settings.Save_Figures || Settings.Display.IndividualPlots)
+                if Settings.Display.IndividualPlots
+                    f = figure('visible', 'on');
+                else
+                    f = figure('visible', 'off');
+                end
+                f.Position = [10 10 2000 600];
+                imagesc(FigData.slice_image)
+                colormap(Settings.Plot_SliceImageColormap)
+                hold on
+
+                % make average slice fit
+                a = FigData.average_slice;
+                a(a==0) = nan;
+                a = (a-min(a))/(max(a)-min(a)).*size(FigData.slice_image,1);
+                a = flipud(a);
+                plot(a, 'Color', Settings.Plot_SliceImagePlotcolor, 'LineWidth', Settings.Plot_SliceImagePlotlinewidth)   
+                axis off
+                title(FigData.plottitle, 'Interpreter', 'none')
+            else
+                f = [];
+            end
+        end % f = SliceImage
+
         
         
 %         function f = AverageHeight(Settings, FigData)

@@ -226,9 +226,14 @@ Optional settings
 
 
 %% INPUT
-% Settings.Source = 'E:\spreading experiments\HTK_selection\';             % STRING  (Local) path to single image or folder to be analyzed. 
-% Settings.Source = 'E:\spreading experiments\HTK_selection\1-03212022170011-44.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
-Settings.Source = 'E:\spreading experiments\HTK_selection\1-03212022171412-58.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\1-03212022170011-44.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+% Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\1-03212022171412-58.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+%  Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\1-03212022161434-3.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+%  Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\1-03212022162008-4.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+ Settings.Source = 'E:\spreading experiments\HTK\HTK_raw_selection\1-03212022164510-29.tiff';             % STRING  (Local) path to single image or folder to be analyzed. 
+
+
 
 % Settings.TimeInterval = 600;                        % FLOAT   Time between frames in second (if multiple images)
 Settings.TimeInterval = 'FromFile';                     % STRING `'FromFile'` or NUMERIC If FromFile, the datetime stamp is 
@@ -254,13 +259,13 @@ Settings.SliceType = 'sector';                      % STRING  either sector or l
     Settings.LinearEnd = [511 2591];                % ARRAY   End point of sliced area. Optional: if not set, GUI allows to set.
     Settings.LinearAngle = 0.06048*pi;               % FLOAT   Angle between horizontal (x>0) and slice in radians (CW). Note: LinearAngle is decisive, not angle between Start and End. Optional: if not set, GUI allows to set.
 Settings.Analyze_TwoParts = true;                   % LOGIC   Use different settings for inside and outside of slice (set cutoff with Settings.Analyze_TwoParts_CutOff, or don't set (popup)). If false, only _inside is used.
-    Settings.Analyze_TwoParts_CutOff = 500+OutOfImageOffset;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
+    Settings.Analyze_TwoParts_CutOff = 450+OutOfImageOffset;         % INT     Below this datapoint uses _inside settings, after uses _outside settings.
     Settings.Smoothing_inside = 10;                 % FLOAT   Gaussian moving average smoothing of inside data (see MATLABs smoothdata function), default: 10
     Settings.MinPeakDistance_inside = 17;           % FLOAT   Peak fitting MinPeakDistance of inside data (see MATLABs findpeaks function), default: 15
     Settings.MinPeakProminence_inside = .06;        % FLOAT   CutOffIncludeMarginPeak fitting MinPeakProminance of inside data (see MATLABs findpeaks function), default: 0.15
-    Settings.Smoothing_outside = 80;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
-    Settings.MinPeakDistance_outside = 30;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
-    Settings.MinPeakProminence_outside = 0.18;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
+    Settings.Smoothing_outside = 30;                % FLOAT   Gaussian moving average smoothing of outside data (see MATLABs smoothdata function)
+    Settings.MinPeakDistance_outside = 20;         % FLOAT   Peak fitting MinPeakDistance of outside data (see MATLABs findpeaks function)
+    Settings.MinPeakProminence_outside = 0.05;      % FLOAT   Peak fitting MinPeakProminance of outside data (see MATLABs findpeaks function)
 Settings.ImageProcessing.EnhanceContrast = false;   % LOGIC   Enhance contrast before slicing data.
 Settings.IgnoreInside = true;                      % LOGIC   If .Analyze_TwoParts is true, this can just ignore all inside data (sets it to nan).
 Settings.Lambda = 532e-9;                           % FLOAT   Wavelength of light in meters.
@@ -273,7 +278,7 @@ Settings.RefractiveIndex_Medium = 1.434;            % FLOAT   Refractive index o
 Settings.Anlysismode_averaging = 2;                 % INT     1 is height profile for each line, than average. 2 is average first, than height profile for single line.
 Settings.Stitching_AveragePoints = 1;               % INT     When stiching this value determines how many Slice_Endpoints are averaged at start and end of each dataset for use for stitching with previous/next dataset.
 Settings.ImageSkip = 1;                             % INT     Allows to skip images in the analysis. Eg. 4 will analyze images 1,5,9,13,etc
-Settings.NumberSlices = 400;                        % INT     Total number of radial slices in the full 2pi for SliceType=sector.
+Settings.NumberSlices = 800;                        % INT     Total number of radial slices in the full 2pi for SliceType=sector.
 Settings.AnalyzeSector = true;                      % LOGIC   If true, only a sector (between Settings.SectorStart and Settings.SectorEnd) of the full 2pi will be analyzed.
 Settings.EstimateOutsides = true;                   % LOGIC   If true, before first extrema and after last extrema will be estimated (see documentation).
 Settings.FilterBy_AmountExtrema = false;            % LOGIC   TODO needs some work, when some slices are nan.
@@ -299,9 +304,14 @@ Settings.Plot_Contour = false;                      % LOGIC   OUT OF DATE. do no
     Settings.Plot_Contour_Transparency = 0.6;       % FLOAT   Transparancy of contour plot on original image.
 Settings.Plot_AverageHeight = true;                 % LOGIC   Plot the height profile for each image seperately.
 Settings.Plot_AverageHeightAllImages = true;        % LOGIC   Plot all height profiles of all images into a single plot, with colorbar.
-    Settings.Plot_AverageHeightAllImages_EquivPoint = -10;  % INT This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
+    Settings.Plot_AverageHeightAllImages_EquivPoint = -1000;  % INT This point of all the slices will be set equal, so that the minimal value of whatever slice is 0. Use minus for last values. (0 == end, -1 == end-1, etc) 
 Settings.Plot_ResultPlot = true;                    % LOGIC   Plot image, with underneath a combined plot of original slice, filtered slice, detected extrema and height profile.
 Settings.PlotFontSize = 15;                         % INT     FontSize in all plots.
+Settings.Plot_SliceImage = true;
+    Settings.Plot_SliceImageColormap = 'gray';
+    Settings.Plot_SliceImagePlotcolor = 'red';
+    Settings.Plot_SliceImagePlotlinewidth = 3;
+
 
 % Saving
 Settings.Save_Figures = true;                       % LOGIC   Automatically save figures (works even if Display.xx = false).
@@ -333,7 +343,7 @@ LogLevel = 5;  % Recommended at least 2. To reduce clutter use 5. To show all us
 %}
 Settings.HeightResolution = 2e-9;                % Resolution of model fitting. Minimal step size in end result is determined by this. 2nm is decent. NO LONGER NEEEDED. REMOVE IN MODELFIT PLEASE.
 
-
+Settings.ManualCorrectionPeakFinding = true;
 
 %% 0 - Settings checks and ititialization
 
@@ -501,13 +511,23 @@ if Settings.ImageCount > 1
         Logging(5, append('Created folder for image saving "', strrep(savefolder_sub_FinalSlice, '\', '\\'), '" successfully.' ))
     end
 
+    savefolder_sub_SliceImage = append(savefolder_sub, '\SliceImage');
+    [status, msg] = mkdir(savefolder_sub_SliceImage);
+    if status == 0
+        Logging(1, append('Folder creation for image saving "', strrep(savefolder_sub_SliceImage, '\', '\\'), '" failed! Error: ', msg))
+    else
+        Logging(5, append('Created folder for image saving "', strrep(savefolder_sub_SliceImage, '\', '\\'), '" successfully.' ))
+    end
+
     basename_AverageSlice = append(savefolder_sub_AverageSlice, '\', stamp);
     basename_Slice = append(savefolder_sub_Slice, '\', stamp);
     basename_FinalSlice = append(savefolder_sub_FinalSlice, '\', stamp);
+    basename_SliceImage = append(savefolder_sub_SliceImage, '\', stamp);
 else
     basename_AverageSlice = append(savefolder_sub, '\', stamp);
     basename_Slice = append(savefolder_sub, '\', stamp);
     basename_FinalSlice = append(savefolder_sub, '\', stamp);
+    basename_SliceImage = append(savefolder_sub, '\', stamp);
 end
 
 clear stamp savefolder_sub
@@ -573,7 +593,19 @@ catch
     Settings.HostName = 'Could not be determined.';
 end
 
-
+% Check if ManualCorrectionPeakFinding makes sense, i.e. if number of images <= 10.
+if Settings.ManualCorrectionPeakFinding && Settings.ImageCount > 10
+    Logging(2, 'Settings.ManualCorrectionPeakFinding and number of images > 10. Are you sure?')
+    x = input('Y (keep on) / N (turn off) [N]  ','s');
+    if isempty(x) || strcmpi(x, 'N')
+        Settings.ManualCorrectionPeakFinding = false;
+        Logging(5, 'Manual correction of peak finding is disabled.')
+    elseif strcmpi(x, 'Y')
+        Logging(3, 'Manual correction of peak finding is still enabled.')
+    else
+        Logging(1, 'No valid input')
+    end
+end
 
 clear ext steps maxres minres status msg path name extensions savefolder_sub images_fullpath images
 Logging(6, 'Settings checked and all valid.')
@@ -854,10 +886,6 @@ for i = 1:Settings.ImageCount
             PntStart = floor(Slice_Startpoints(k, :));
             PntEnd = floor(Slice_Endpoints(k, :));
             roi = [PntEnd; PntStart];
-
-
-%             pnt = floor(Slice_Endpoints(k, :));
-%             roi = [pnt; Settings.SectorCenter];
             cel_AllSlices{k} = improfile(I, roi(:,1), roi(:,2), norm(roi(1,:)'-roi(2,:)')); 
         end
         % determine the length of the longest slice and include some extra distance, since we need to offset the data to
@@ -870,22 +898,25 @@ for i = 1:Settings.ImageCount
             % the shorter ones. Also, we want to align the slices on the Slice_Startpoints line in linear case. The latter is
             % done using the Distance_IntersectToEnd.
 
-            
             startpnt = max(Distance_IntersectToEnd) - Distance_IntersectToEnd(m) + 1;
             arr_AllSlices(m, startpnt : startpnt + length(cel_AllSlices{m}) - 1) = flip(cel_AllSlices{m});
             clear startpnt
-
 
 %             arr_AllSlices(m,1:length(cel_AllSlices{m})) = cel_AllSlices{m}; % CHANGE THIS: now aligning on first datapoints, needs to be on analysis line
 %             arr_AllSlices(m,max_length-length(cel_AllSlices{m})+1:end) = cel_AllSlices{m};
 
         end
-        arr_AllSlices = flip(arr_AllSlices,2);
 
+        arr_AllSlices = flip(arr_AllSlices, 2);
         cel_AllAverageSlices{i} = mean(arr_AllSlices, 1, 'omitnan'); %TODO also nan if less than n datapoints (e.g. 3).
-        
-        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, cel_AllAverageSlices{i}');
 
+        [~, filename, ~] = fileparts(Image);
+        f9 = Plot.SliceImage(Settings, struct('slice_image',flip(arr_AllSlices,2), 'average_slice',flip(cel_AllAverageSlices{i}), 'plottitle', filename));
+        SaveFigure(min([Settings.Save_Figures Settings.Plot_SliceImage]), f9, save_extensions, append(basename_SliceImage, '_SliceImage_', num2str(i)));
+        if ~Settings.Display.IndividualPlots; close(f9); end % must close, even if not visible, otherwise in memory
+
+
+        [c_or, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSlice(NaN, NaN, Settings, cel_AllAverageSlices{i}');
 
         if Settings.IgnoreInside 
             d_final(1:Settings.Analyze_TwoParts_CutOff) = NaN;

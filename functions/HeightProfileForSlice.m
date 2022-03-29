@@ -153,20 +153,28 @@ function [c, c_nor, d_final, pks_locs, mns_locs, pks, mns] = HeightProfileForSli
 %         mns = [mns; -c_nor(end)];
 %     end
     
-    pks = flip(pks); pks_locs = flip(pks_locs); 
+    pks = flip(pks); pks_locs = flip(pks_locs);
     mns = flip(mns); mns_locs = flip(mns_locs); 
 
+
+%% Manual Correction Peak Finding
+% If true, it will allow to move around the extrema found manually
+
+if Settings.ManualCorrectionPeakFinding
+    [pks, pks_locs, mns, mns_locs] = ManualPeakCorrections(c_nor, pks, pks_locs, mns, mns_locs);
+end
+
 %% Fitting with model
-
-
-    d_all = cell(1, length(pks_locs) + length(mns_locs) - 2);
-
     locs = [pks_locs; mns_locs];
     extr = [pks; mns];
     [locs, idx] = sort(locs);
     extr = extr(idx);
     locs = flip(locs);
     extr = flip(extr);
+
+    d_all = cell(1, length(extr) - 2);
+
+    
     
     if isempty(extr)
         d_final = nan;
